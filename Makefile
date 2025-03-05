@@ -7,6 +7,9 @@ install-deps:
 	GOBIN=$(LOCAL_BIN) go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.5
 	GOBIN=$(LOCAL_BIN) go install -mod=mod google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
 
+test:
+	go test ./...
+
 build:
 	go build -o bin/server cmd/server.go
 
@@ -24,3 +27,6 @@ migrate-down:
 
 start-dev-server:
 	go tool air --build.cmd "go build -o bin/server cmd/server.go" --build.bin "./bin/server"
+
+test-continuously:
+	go tool air --build.cmd "go test ./..." --build.bin ""
