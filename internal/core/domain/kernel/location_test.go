@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/victor-tsykanov/delivery/internal/core/domain/errors"
+	"github.com/victor-tsykanov/delivery/internal/common/errors"
 )
 
 func TestNewLocation(t *testing.T) {

@@ -27,3 +27,6 @@ migrate-down:
 
 start-dev-server:
 	go tool air --build.cmd "go build -o bin/server cmd/server.go" --build.bin "./bin/server"
+
+test-continuously:
+	go tool air --build.cmd "go test ./..." --build.bin ""

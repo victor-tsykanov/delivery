@@ -5,7 +5,7 @@ import (
 	"math"
 	"math/rand"
 
-	"github.com/victor-tsykanov/delivery/internal/core/domain/errors"
+	"github.com/victor-tsykanov/delivery/internal/common/errors"
 )
 
 const (
