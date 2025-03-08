@@ -51,8 +51,8 @@ func TestNewLocation(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			location, err := NewLocation(tt.args.x, tt.args.y)
 
-			assert.Equal(t, err, tt.wantErr)
-			assert.Equal(t, location, tt.want)
+			assert.Equal(t, tt.wantErr, err)
+			assert.Equal(t, tt.want, location)
 		})
 	}
 }
@@ -82,7 +82,7 @@ func TestLocation_Equals(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			isEqual := tt.first.Equals(tt.second)
 
-			assert.Equal(t, isEqual, tt.want)
+			assert.Equal(t, tt.want, isEqual)
 		})
 	}
 }
@@ -118,7 +118,7 @@ func TestLocation_DistanceTo(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			distance := tt.first.DistanceTo(tt.second)
 
-			assert.Equal(t, distance, tt.want)
+			assert.Equal(t, tt.want, distance)
 		})
 	}
 }
