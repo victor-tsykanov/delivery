@@ -18,12 +18,12 @@ func NewValueIsOutOfRangeError[T any](paramName string, value T, minValue T, max
 	}
 }
 
-func (v *ValueIsOutOfRangeError[T]) Error() string {
+func (e *ValueIsOutOfRangeError[T]) Error() string {
 	return fmt.Sprintf(
 		"value %v of %v is out of range, must be between %v and %v",
-		v.value,
-		v.paramName,
-		v.min,
-		v.max,
+		e.value,
+		e.paramName,
+		e.min,
+		e.max,
 	)
 }
