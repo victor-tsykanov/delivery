@@ -2,10 +2,10 @@ package kernel
 
 import (
 	"log"
-	"math"
 	"math/rand"
 
 	"github.com/victor-tsykanov/delivery/internal/common/errors"
+	"github.com/victor-tsykanov/delivery/internal/common/math"
 )
 
 const (
@@ -32,6 +32,14 @@ func NewLocation(x int, y int) (*Location, error) {
 	return &Location{x: x, y: y}, nil
 }
 
+func (l *Location) X() int {
+	return l.x
+}
+
+func (l *Location) Y() int {
+	return l.y
+}
+
 //nolint:gosec
 func RandomLocation() *Location {
 	location, err := NewLocation(
@@ -50,8 +58,8 @@ func (l *Location) Equals(other Location) bool {
 }
 
 func (l *Location) DistanceTo(other Location) int {
-	xDistance := math.Abs(float64(l.x - other.x))
-	yDistance := math.Abs(float64(l.y - other.y))
+	xDistance := math.Abs(l.x - other.x)
+	yDistance := math.Abs(l.y - other.y)
 
 	return int(xDistance + yDistance)
 }
