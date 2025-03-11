@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/victor-tsykanov/delivery/internal/common/errors"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/kernel"
+	"github.com/victor-tsykanov/delivery/internal/core/domain/model/courier"
 )
 
 func TestNewOrder(t *testing.T) {
@@ -78,11 +79,11 @@ func TestOrder_Assign(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			courierID := uuid.New()
+			bob := courier.Fixtures.FreeCourier()
 			originalStatus := tt.order.Status()
 			originalCourierID := tt.order.CourierID()
 
-			err := tt.order.Assign(courierID)
+			err := tt.order.Assign(bob)
 
 			if tt.wantErr != nil {
 				assert.Equal(t, tt.wantErr, err)
@@ -93,7 +94,7 @@ func TestOrder_Assign(t *testing.T) {
 
 			assert.NoError(t, err)
 			assert.Equal(t, StatusAssigned, tt.order.Status())
-			assert.Equal(t, &courierID, tt.order.CourierID())
+			assert.Equal(t, bob.ID(), *(tt.order.CourierID()))
 		})
 	}
 }

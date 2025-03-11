@@ -4,6 +4,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/victor-tsykanov/delivery/internal/common/errors"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/kernel"
+	"github.com/victor-tsykanov/delivery/internal/core/domain/model/courier"
 )
 
 type Order struct {
@@ -41,7 +42,7 @@ func (o *Order) CourierID() *uuid.UUID {
 	return o.courierID
 }
 
-func (o *Order) Assign(courierID uuid.UUID) error {
+func (o *Order) Assign(courier *courier.Courier) error {
 	if o.status != StatusCreated {
 		var message string
 
@@ -57,6 +58,7 @@ func (o *Order) Assign(courierID uuid.UUID) error {
 		return errors.NewInvalidStateError(message)
 	}
 
+	courierID := courier.ID()
 	o.courierID = &courierID
 	o.status = StatusAssigned
 
