@@ -17,45 +17,45 @@ func TestNewCourier(t *testing.T) {
 	require.NoError(t, err)
 
 	tests := []struct {
-		name         string
-		courrierName string
-		transport    *Transport
-		location     *kernel.Location
-		wantErr      error
+		name        string
+		courierName string
+		transport   *Transport
+		location    *kernel.Location
+		wantErr     error
 	}{
 		{
-			name:         "valid",
-			courrierName: "John Doe",
-			transport:    transport,
-			location:     location,
-			wantErr:      nil,
+			name:        "valid",
+			courierName: "John Doe",
+			transport:   transport,
+			location:    location,
+			wantErr:     nil,
 		},
 		{
-			name:         "empty name",
-			courrierName: "",
-			transport:    transport,
-			location:     location,
-			wantErr:      errors.NewValueIsRequiredError("name"),
+			name:        "empty name",
+			courierName: "",
+			transport:   transport,
+			location:    location,
+			wantErr:     errors.NewValueIsRequiredError("name"),
 		},
 		{
-			name:         "nil transport",
-			courrierName: "John Doe",
-			transport:    nil,
-			location:     location,
-			wantErr:      errors.NewValueIsRequiredError("transport"),
+			name:        "nil transport",
+			courierName: "John Doe",
+			transport:   nil,
+			location:    location,
+			wantErr:     errors.NewValueIsRequiredError("transport"),
 		},
 		{
-			name:         "nil location",
-			courrierName: "John Doe",
-			transport:    transport,
-			location:     nil,
-			wantErr:      errors.NewValueIsRequiredError("location"),
+			name:        "nil location",
+			courierName: "John Doe",
+			transport:   transport,
+			location:    nil,
+			wantErr:     errors.NewValueIsRequiredError("location"),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			courier, err := NewCourier(tt.courrierName, tt.transport, tt.location)
+			courier, err := NewCourier(tt.courierName, tt.transport, tt.location)
 
 			if tt.wantErr != nil {
 				assert.Equal(t, tt.wantErr, err)
@@ -65,7 +65,7 @@ func TestNewCourier(t *testing.T) {
 			}
 
 			assert.NotNil(t, courier)
-			assert.Equal(t, tt.courrierName, courier.Name())
+			assert.Equal(t, tt.courierName, courier.Name())
 			assert.Equal(t, tt.transport, courier.Transport())
 			assert.Equal(t, tt.location, courier.Location())
 			assert.Equal(t, StatusFree, courier.Status())
