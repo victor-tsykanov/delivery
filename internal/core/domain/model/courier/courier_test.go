@@ -4,7 +4,6 @@ import (
 	"log"
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/victor-tsykanov/delivery/internal/common/errors"
@@ -13,49 +12,65 @@ import (
 
 func TestNewCourier(t *testing.T) {
 	location := kernel.RandomLocation()
-	transport, err := NewTransport(uuid.New(), "Car", 3)
-	require.NoError(t, err)
 
 	tests := []struct {
-		name        string
-		courierName string
-		transport   *Transport
-		location    *kernel.Location
-		wantErr     error
+		name           string
+		courierName    string
+		transportName  string
+		transportSpeed int
+		location       *kernel.Location
+		wantErr        error
 	}{
 		{
-			name:        "valid",
-			courierName: "John Doe",
-			transport:   transport,
-			location:    location,
-			wantErr:     nil,
+			name:           "valid",
+			courierName:    "John Doe",
+			transportName:  "Car",
+			transportSpeed: 3,
+			location:       location,
+			wantErr:        nil,
 		},
 		{
-			name:        "empty name",
-			courierName: "",
-			transport:   transport,
-			location:    location,
-			wantErr:     errors.NewValueIsRequiredError("name"),
+			name:           "empty name",
+			courierName:    "",
+			transportName:  "Car",
+			transportSpeed: 3,
+			location:       location,
+			wantErr:        errors.NewValueIsRequiredError("name"),
 		},
 		{
-			name:        "nil transport",
-			courierName: "John Doe",
-			transport:   nil,
-			location:    location,
-			wantErr:     errors.NewValueIsRequiredError("transport"),
+			name:           "empty transport name",
+			courierName:    "John Doe",
+			transportName:  "",
+			transportSpeed: 3,
+			location:       location,
+			wantErr:        errors.NewValueIsRequiredError("transportName"),
 		},
 		{
-			name:        "nil location",
-			courierName: "John Doe",
-			transport:   transport,
-			location:    nil,
-			wantErr:     errors.NewValueIsRequiredError("location"),
+			name:           "invalid transport speed",
+			courierName:    "John Doe",
+			transportName:  "Car",
+			transportSpeed: 3000,
+			location:       location,
+			wantErr:        errors.NewValueIsOutOfRangeError("transportSpeed", 3000, 1, 3),
+		},
+		{
+			name:           "nil location",
+			courierName:    "John Doe",
+			transportName:  "Car",
+			transportSpeed: 3,
+			location:       nil,
+			wantErr:        errors.NewValueIsRequiredError("location"),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			courier, err := NewCourier(tt.courierName, tt.transport, tt.location)
+			courier, err := NewCourier(
+				tt.courierName,
+				tt.transportName,
+				tt.transportSpeed,
+				tt.location,
+			)
 
 			if tt.wantErr != nil {
 				assert.Equal(t, tt.wantErr, err)
@@ -66,7 +81,8 @@ func TestNewCourier(t *testing.T) {
 
 			assert.NotNil(t, courier)
 			assert.Equal(t, tt.courierName, courier.Name())
-			assert.Equal(t, tt.transport, courier.Transport())
+			assert.Equal(t, tt.transportName, courier.Transport().Name())
+			assert.Equal(t, tt.transportSpeed, courier.Transport().Speed())
 			assert.Equal(t, tt.location, courier.Location())
 			assert.Equal(t, StatusFree, courier.Status())
 		})
@@ -136,14 +152,11 @@ func TestCourier_SetFree(t *testing.T) {
 }
 
 func TestCourier_Move(t *testing.T) {
-	transport, err := NewTransport(uuid.New(), "Car", 3)
-	require.NoError(t, err)
-
 	currentLocation := newLocation(1, 1)
 	targetLocation := newLocation(1, 9)
 	expectedLocation := newLocation(1, 4)
 
-	courier, err := NewCourier("John Doe", transport, currentLocation)
+	courier, err := NewCourier("John Doe", "Car", 3, currentLocation)
 	require.NoError(t, err)
 
 	err = courier.Move(targetLocation)
@@ -181,10 +194,7 @@ func TestCourier_CalculateStepsToLocation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			transport, err := NewTransport(uuid.New(), "Car", 3)
-			require.NoError(t, err)
-
-			courier, err := NewCourier("John Doe", transport, tt.from)
+			courier, err := NewCourier("John Doe", "Car", 3, tt.from)
 			require.NoError(t, err)
 
 			steps, err := courier.CalculateStepsToLocation(tt.to)

@@ -16,17 +16,33 @@ type Courier struct {
 	status    Status
 }
 
-func NewCourier(name string, transport *Transport, location *kernel.Location) (*Courier, error) {
+func NewCourier(
+	name string,
+	transportName string,
+	transportSpeed int,
+	location *kernel.Location,
+) (*Courier, error) {
 	if name == "" {
 		return nil, errors.NewValueIsRequiredError("name")
 	}
 
-	if transport == nil {
-		return nil, errors.NewValueIsRequiredError("transport")
+	err := validateTransportName(transportName, "transportName")
+	if err != nil {
+		return nil, err
+	}
+
+	err = validateTransportSpeed(transportSpeed, "transportSpeed")
+	if err != nil {
+		return nil, err
 	}
 
 	if location == nil {
 		return nil, errors.NewValueIsRequiredError("location")
+	}
+
+	transport, err := NewTransport(uuid.New(), transportName, transportSpeed)
+	if err != nil {
+		return nil, err
 	}
 
 	return &Courier{

@@ -16,14 +16,14 @@ type Transport struct {
 }
 
 func NewTransport(id uuid.UUID, name string, speed int) (*Transport, error) {
-	if name == "" {
-		return nil, errors.NewValueIsRequiredError("name")
+	err := validateTransportName(name, "name")
+	if err != nil {
+		return nil, err
 	}
 
-	const minSpeed = 1
-	const maxSpeed = 3
-	if speed < minSpeed || speed > maxSpeed {
-		return nil, errors.NewValueIsOutOfRangeError("speed", speed, minSpeed, maxSpeed)
+	err = validateTransportSpeed(speed, "speed")
+	if err != nil {
+		return nil, err
 	}
 
 	return &Transport{
@@ -63,4 +63,23 @@ func (t *Transport) Move(from *kernel.Location, to *kernel.Location) (*kernel.Lo
 	}
 
 	return nextLocation, nil
+}
+
+func validateTransportName(value string, paramName string) error {
+	if value == "" {
+		return errors.NewValueIsRequiredError(paramName)
+	}
+
+	return nil
+}
+
+func validateTransportSpeed(value int, paramName string) error {
+	const minSpeed = 1
+	const maxSpeed = 3
+
+	if value < minSpeed || value > maxSpeed {
+		return errors.NewValueIsOutOfRangeError(paramName, value, minSpeed, maxSpeed)
+	}
+
+	return nil
 }
