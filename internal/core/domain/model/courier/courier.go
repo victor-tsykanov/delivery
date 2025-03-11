@@ -58,8 +58,8 @@ func (c *Courier) SetFree() error {
 	return nil
 }
 
-func (c *Courier) Move(targetLocation kernel.Location) error {
-	newLocation, err := c.transport.Move(c.location, &targetLocation)
+func (c *Courier) Move(targetLocation *kernel.Location) error {
+	newLocation, err := c.transport.Move(c.location, targetLocation)
 	if err != nil {
 		return fmt.Errorf("transport failed to move: %w", err)
 	}
@@ -69,7 +69,7 @@ func (c *Courier) Move(targetLocation kernel.Location) error {
 	return nil
 }
 
-func (c *Courier) CalculateStepsToLocation(location kernel.Location) (int, error) {
+func (c *Courier) CalculateStepsToLocation(location *kernel.Location) (int, error) {
 	var (
 		steps           = 0
 		err             error
@@ -77,11 +77,11 @@ func (c *Courier) CalculateStepsToLocation(location kernel.Location) (int, error
 	)
 
 	for {
-		if currentLocation.Equals(location) {
+		if currentLocation.Equals(*location) {
 			break
 		}
 
-		currentLocation, err = c.transport.Move(currentLocation, &location)
+		currentLocation, err = c.transport.Move(currentLocation, location)
 		if err != nil {
 			return 0, fmt.Errorf("transport failed to move: %w", err)
 		}

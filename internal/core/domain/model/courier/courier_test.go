@@ -146,7 +146,7 @@ func TestCourier_Move(t *testing.T) {
 	courier, err := NewCourier("John Doe", transport, currentLocation)
 	require.NoError(t, err)
 
-	err = courier.Move(*targetLocation)
+	err = courier.Move(targetLocation)
 
 	assert.NoError(t, err)
 	assert.Equal(t, expectedLocation, courier.Location())
@@ -187,7 +187,7 @@ func TestCourier_CalculateStepsToLocation(t *testing.T) {
 			courier, err := NewCourier("John Doe", transport, tt.from)
 			require.NoError(t, err)
 
-			steps, err := courier.CalculateStepsToLocation(*tt.to)
+			steps, err := courier.CalculateStepsToLocation(tt.to)
 
 			assert.NoError(t, err)
 			assert.Equal(t, tt.want, steps)
