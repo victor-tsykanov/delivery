@@ -83,3 +83,11 @@ func validateTransportSpeed(value int, paramName string) error {
 
 	return nil
 }
+
+func RestoreTransport(id uuid.UUID, name string, speed int) *Transport {
+	return &Transport{
+		id:    id,
+		name:  name,
+		speed: speed,
+	}
+}

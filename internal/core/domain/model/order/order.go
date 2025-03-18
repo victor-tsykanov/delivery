@@ -85,3 +85,12 @@ func (o *Order) Complete() error {
 
 	return nil
 }
+
+func RestoreOrder(id uuid.UUID, location *kernel.Location, status Status, courierID *uuid.UUID) *Order {
+	return &Order{
+		id:        id,
+		location:  *location,
+		status:    status,
+		courierID: courierID,
+	}
+}

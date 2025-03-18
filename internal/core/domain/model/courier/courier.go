@@ -127,3 +127,19 @@ func (c *Courier) Location() *kernel.Location {
 func (c *Courier) Status() Status {
 	return c.status
 }
+
+func RestoreCourier(
+	id uuid.UUID,
+	name string,
+	transport *Transport,
+	location *kernel.Location,
+	status Status,
+) *Courier {
+	return &Courier{
+		id:        id,
+		name:      name,
+		transport: transport,
+		location:  location,
+		status:    status,
+	}
+}

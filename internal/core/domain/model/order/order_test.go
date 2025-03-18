@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/victor-tsykanov/delivery/internal/common/errors"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/kernel"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/model/courier"
@@ -139,4 +140,23 @@ func TestOrder_Complete(t *testing.T) {
 			assert.Equal(t, StatusCompleted, tt.order.Status())
 		})
 	}
+}
+
+func TestRestoreOrder(t *testing.T) {
+	orderID := uuid.New()
+	location := kernel.RandomLocation()
+	courierID := uuid.New()
+
+	order := RestoreOrder(
+		orderID,
+		location,
+		StatusCompleted,
+		&courierID,
+	)
+
+	require.NotNil(t, order)
+	assert.Equal(t, orderID, order.ID())
+	assert.Equal(t, *location, order.Location())
+	assert.Equal(t, StatusCompleted, order.Status())
+	assert.Equal(t, &courierID, order.CourierID())
 }
