@@ -7,7 +7,7 @@ import (
 	"github.com/victor-tsykanov/delivery/internal/adapters/out/postgres"
 	"github.com/victor-tsykanov/delivery/internal/adapters/out/postgres/order"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/services"
-	ports "github.com/victor-tsykanov/delivery/internal/core/ports/out"
+	outPorts "github.com/victor-tsykanov/delivery/internal/core/ports/out"
 	"gorm.io/gorm"
 )
 
@@ -21,8 +21,8 @@ type DomainServices struct {
 }
 
 type Repositories struct {
-	TransactionManager ports.ITransactionManager
-	OrderRepository    ports.IOrderRepository
+	TransactionManager outPorts.ITransactionManager
+	OrderRepository    outPorts.IOrderRepository
 }
 
 func NewCompositionRoot(_ context.Context, gormDb *gorm.DB) CompositionRoot {
