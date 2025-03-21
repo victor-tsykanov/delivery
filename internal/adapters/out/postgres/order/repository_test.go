@@ -7,30 +7,24 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
 	"github.com/victor-tsykanov/delivery/internal/adapters/out/postgres/order"
-	repoTesting "github.com/victor-tsykanov/delivery/internal/adapters/out/postgres/testing"
+	"github.com/victor-tsykanov/delivery/internal/common/testutils"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/kernel"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/model/courier"
 	domainOrder "github.com/victor-tsykanov/delivery/internal/core/domain/model/order"
 )
 
 type OrderRepositoryTestSuite struct {
-	repoTesting.RepositoryTestSuite
+	testutils.DBTestSuite
 	repository *order.Repository
 }
 
 func (s *OrderRepositoryTestSuite) SetupTest() {
-	err := s.DB().AutoMigrate(&order.Order{})
-	s.Require().NoError(err)
+	s.DBTestSuite.SetupTest()
 
 	repository, err := order.NewRepository(s.DB())
 	s.Require().NoError(err)
 
 	s.repository = repository
-}
-
-func (s *OrderRepositoryTestSuite) TearDownTest() {
-	err := s.DB().Migrator().DropTable(&order.Order{})
-	s.Require().NoError(err)
 }
 
 func TestOrderRepositoryTestSuite(t *testing.T) {
