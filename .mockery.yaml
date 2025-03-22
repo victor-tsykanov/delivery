@@ -1,0 +1,11 @@
+with-expecter: True
+dir: mocks/{{ replaceAll .PackagePath "internal" "internal_" }}
+packages:
+  github.com/victor-tsykanov/delivery/internal/core/ports/out:
+    interfaces:
+      ITransactionManager:
+      ICourierRepository:
+      IOrderRepository:
+  github.com/victor-tsykanov/delivery/internal/core/domain/services:
+    interfaces:
+      IDispatchService:

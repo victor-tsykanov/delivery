@@ -22,3 +22,4 @@ issues:
     - should have a package comment
     - should have comment or be unexported
     - should have comment \(or a comment on this block\) or be unexported
+    - error-naming

@@ -7,29 +7,23 @@ import (
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/stretchr/testify/suite"
 	"github.com/victor-tsykanov/delivery/internal/adapters/out/postgres/courier"
-	repoTesting "github.com/victor-tsykanov/delivery/internal/adapters/out/postgres/testing"
+	"github.com/victor-tsykanov/delivery/internal/common/testutils"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/kernel"
 	domainCourier "github.com/victor-tsykanov/delivery/internal/core/domain/model/courier"
 )
 
 type CourierRepositoryTestSuite struct {
-	repoTesting.RepositoryTestSuite
+	testutils.DBTestSuite
 	repository *courier.Repository
 }
 
 func (s *CourierRepositoryTestSuite) SetupTest() {
-	err := s.DB().AutoMigrate(&courier.Courier{}, &courier.Transport{})
-	s.Require().NoError(err)
+	s.DBTestSuite.SetupTest()
 
 	repository, err := courier.NewRepository(s.DB())
 	s.Require().NoError(err)
 
 	s.repository = repository
-}
-
-func (s *CourierRepositoryTestSuite) TearDownTest() {
-	err := s.DB().Migrator().DropTable(&courier.Courier{}, &courier.Transport{})
-	s.Require().NoError(err)
 }
 
 func TestCourierRepositoryTestSuite(t *testing.T) {
