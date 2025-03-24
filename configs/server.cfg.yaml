@@ -1,6 +1,7 @@
-package: api
+package: servers
 output: pkg/servers/servers.gen.go
 generate:
   echo-server: true
   embedded-spec: true
+  strict-server: true
   models: true

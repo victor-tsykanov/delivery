@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/caarlos0/env/v11"
 )
@@ -18,10 +19,19 @@ type DBConfig struct {
 func LoadDBConfig() (*DBConfig, error) {
 	config := &DBConfig{}
 	if err := env.Parse(config); err != nil {
-		return nil, fmt.Errorf("failed to parse  environment variables: %w", err)
+		return nil, fmt.Errorf("failed to parse environment variables: %w", err)
 	}
 
 	return config, nil
+}
+
+func MustLoadDBConfig() *DBConfig {
+	config, err := LoadDBConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return config
 }
 
 func (c *DBConfig) DSN() string {

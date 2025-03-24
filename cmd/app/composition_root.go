@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"context"
@@ -43,7 +43,7 @@ type QueryHandlers struct {
 	GetPendingOrdersQueryHandler inPorts.IGetPendingOrdersQueryHandler
 }
 
-func NewCompositionRoot(_ context.Context, gormDb *gorm.DB) CompositionRoot {
+func NewCompositionRoot(_ context.Context, gormDb *gorm.DB) *CompositionRoot {
 	dispatchService, err := services.NewDispatchService()
 	if err != nil {
 		log.Fatalf("faied to create DispatchService: %v", err)
@@ -118,5 +118,5 @@ func NewCompositionRoot(_ context.Context, gormDb *gorm.DB) CompositionRoot {
 		},
 	}
 
-	return compositionRoot
+	return &compositionRoot
 }
