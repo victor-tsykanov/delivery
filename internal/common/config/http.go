@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/caarlos0/env/v11"
 )
@@ -18,6 +19,15 @@ func LoadHTTPConfig() (*HTTPConfig, error) {
 	}
 
 	return config, nil
+}
+
+func MustLoadHTTPConfig() *HTTPConfig {
+	config, err := LoadHTTPConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return config
 }
 
 func (c *HTTPConfig) Address() string {

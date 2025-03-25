@@ -25,9 +25,8 @@ func (s *GetAllCouriersQueryHandlerTestSuite) TestHandle() {
 	// Arrange
 	ctx := context.Background()
 
-	firstFreeCourier := s.createCourier(courier.StatusFree)
-	_ = s.createCourier(courier.StatusBusy)
-	secondFreeCourier := s.createCourier(courier.StatusFree)
+	freeCourier := s.createCourier(courier.StatusFree)
+	busyCourier := s.createCourier(courier.StatusBusy)
 
 	handler, err := queries.NewGetAllCouriersQueryHandler(s.DB())
 	s.Require().NoError(err)
@@ -40,15 +39,15 @@ func (s *GetAllCouriersQueryHandlerTestSuite) TestHandle() {
 
 	s.Assert().Len(couriers, 2)
 
-	s.Assert().Equal(firstFreeCourier.id, couriers[0].ID)
-	s.Assert().Equal(firstFreeCourier.name, couriers[0].Name)
-	s.Assert().Equal(firstFreeCourier.locationX, couriers[0].Location.X)
-	s.Assert().Equal(firstFreeCourier.locationY, couriers[0].Location.Y)
+	s.Assert().Equal(freeCourier.id, couriers[0].ID)
+	s.Assert().Equal(freeCourier.name, couriers[0].Name)
+	s.Assert().Equal(freeCourier.locationX, couriers[0].Location.X)
+	s.Assert().Equal(freeCourier.locationY, couriers[0].Location.Y)
 
-	s.Assert().Equal(secondFreeCourier.id, couriers[1].ID)
-	s.Assert().Equal(secondFreeCourier.name, couriers[1].Name)
-	s.Assert().Equal(secondFreeCourier.locationX, couriers[1].Location.X)
-	s.Assert().Equal(secondFreeCourier.locationY, couriers[1].Location.Y)
+	s.Assert().Equal(busyCourier.id, couriers[1].ID)
+	s.Assert().Equal(busyCourier.name, couriers[1].Name)
+	s.Assert().Equal(busyCourier.locationX, couriers[1].Location.X)
+	s.Assert().Equal(busyCourier.locationY, couriers[1].Location.Y)
 }
 
 type courierRecord struct {

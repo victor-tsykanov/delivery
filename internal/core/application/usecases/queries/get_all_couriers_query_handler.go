@@ -6,7 +6,6 @@ import (
 	"log"
 
 	"github.com/google/uuid"
-	"github.com/victor-tsykanov/delivery/internal/core/domain/model/courier"
 	inPorts "github.com/victor-tsykanov/delivery/internal/core/ports/in"
 	"gorm.io/gorm"
 )
@@ -23,11 +22,9 @@ func (h *GetAllCouriersQueryHandler) Handle(ctx context.Context) ([]*inPorts.Cou
 	rows, err := h.db.
 		WithContext(ctx).
 		Raw(
-			"select id, name, location_x, location_y from couriers "+
-				"where deleted_at is null "+
-				"and status = ? "+
+			"select id, name, location_x, location_y from couriers " +
+				"where deleted_at is null " +
 				"order by created_at",
-			string(courier.StatusFree),
 		).
 		Rows()
 	if err != nil {
