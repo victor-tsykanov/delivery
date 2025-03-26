@@ -4,15 +4,32 @@ LOCAL_BIN:=$(CURDIR)/bin
 DB_DSN="host=localhost port=$(DB_PORT) dbname=$(DB_DATABASE) user=$(DB_USER) password=$(DB_PASSWORD) sslmode=$(DB_SSL_MODE)"
 
 install-deps:
-	GOBIN=$(LOCAL_BIN) go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.5
+	GOBIN=$(LOCAL_BIN) go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.6
 	GOBIN=$(LOCAL_BIN) go install -mod=mod google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
 
-generate:
-	rm -rf pkg/servers
+generate: generate-mocks generate-delivery-api generate-geo-api
+
+generate-mocks:
 	rm -rf mocks
-	mkdir -p pkg/servers
 	go tool mockery
+
+generate-delivery-api:
+	rm -rf pkg/servers
+	mkdir -p pkg/servers
 	go tool oapi-codegen -config configs/server.cfg.yaml https://gitlab.com/microarch-ru/ddd-in-practice/system-design/-/raw/main/services/delivery/contracts/openapi.yml
+
+generate-geo-api:
+	wget https://gitlab.com/microarch-ru/ddd-in-practice/system-design/-/raw/main/services/geo/contracts/contract.proto -O api/geo/contract.proto
+	rm -rf pkg/clients/geo
+	mkdir -p pkg/clients/geo
+	protoc --proto_path api/geo \
+		--go_out=pkg/clients/geo --go_opt=paths=source_relative \
+		--go_opt=Mcontract.proto=github.com/victor-tsykanov/delivery/pkg/cliets/geo \
+		--plugin=protoc-gen-go=bin/protoc-gen-go \
+		--go-grpc_out=pkg/clients/geo --go-grpc_opt=paths=source_relative \
+		--go-grpc_opt=Mcontract.proto=github.com/victor-tsykanov/delivery/pkg/cliets/geo \
+		--plugin=protoc-gen-go-grpc=bin/protoc-gen-go-grpc \
+		api/geo/contract.proto
 
 test:
 	go test ./...

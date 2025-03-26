@@ -18,10 +18,11 @@ func main() {
 	config.MustLoadEnv(".env")
 	dbConfig := config.MustLoadDBConfig()
 	httpConfig := config.MustLoadHTTPConfig()
+	geoServiceConfig := config.MustLoadGeoServiceConfig()
 
 	ctx := context.Background()
 	db := mustConnectToDB(dbConfig.DSN())
-	root := app.NewCompositionRoot(ctx, db)
+	root := app.NewCompositionRoot(ctx, db, geoServiceConfig.Address)
 
 	go http.Serve(ctx, root, httpConfig)
 	go jobs.AssignOrders(ctx, root)
@@ -31,6 +32,8 @@ func main() {
 	signal.Notify(signalChan, os.Interrupt, os.Kill)
 
 	<-signalChan
+
+	root.Shutdown(ctx)
 }
 
 func mustConnectToDB(dsn string) *gorm.DB {

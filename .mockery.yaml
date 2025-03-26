@@ -6,6 +6,7 @@ packages:
       ITransactionManager:
       ICourierRepository:
       IOrderRepository:
+      IGeoClient:
   github.com/victor-tsykanov/delivery/internal/core/domain/services:
     interfaces:
       IDispatchService:
