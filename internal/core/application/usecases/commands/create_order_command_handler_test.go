@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"github.com/victor-tsykanov/delivery/internal/core/application/usecases/commands"
+	"github.com/victor-tsykanov/delivery/internal/core/domain/kernel"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/model/order"
 	inPorts "github.com/victor-tsykanov/delivery/internal/core/ports/in"
 	outPorts "github.com/victor-tsykanov/delivery/mocks/github.com/victor-tsykanov/delivery/internal_/core/ports/out"
@@ -19,9 +20,11 @@ func TestCreateOrderCommandHandler_Handle(t *testing.T) {
 	ctx := context.Background()
 	orderID := uuid.New()
 	street := gofakeit.Address().Address
+	location := kernel.RandomLocation()
 
 	transactionManager := outPorts.NewMockITransactionManager(t)
 	orderRepository := outPorts.NewMockIOrderRepository(t)
+	geoClient := outPorts.NewMockIGeoClient(t)
 
 	transactionManager.
 		EXPECT().
@@ -36,12 +39,20 @@ func TestCreateOrderCommandHandler_Handle(t *testing.T) {
 	orderRepository.
 		EXPECT().
 		Create(ctx, mock.MatchedBy(func(newOrder *order.Order) bool {
-			return newOrder.ID() == orderID && newOrder.Status() == order.StatusCreated
+			return newOrder.ID() == orderID &&
+				newOrder.Status() == order.StatusCreated &&
+				location.Equals(newOrder.Location())
 		})).
 		Return(nil).
 		Once()
 
-	handler, err := commands.NewCreateOrderCommandHandler(transactionManager, orderRepository)
+	geoClient.
+		EXPECT().
+		GetLocation(ctx, street).
+		Return(location, nil).
+		Once()
+
+	handler, err := commands.NewCreateOrderCommandHandler(transactionManager, orderRepository, geoClient)
 	require.NoError(t, err)
 
 	command, err := inPorts.NewCreateOrderCommand(orderID, street)

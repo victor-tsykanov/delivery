@@ -2,8 +2,10 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"log"
 
+	"github.com/victor-tsykanov/delivery/internal/adapters/out/grpc"
 	"github.com/victor-tsykanov/delivery/internal/adapters/out/postgres"
 	"github.com/victor-tsykanov/delivery/internal/adapters/out/postgres/courier"
 	"github.com/victor-tsykanov/delivery/internal/adapters/out/postgres/order"
@@ -16,10 +18,22 @@ import (
 )
 
 type CompositionRoot struct {
-	DomainServices  DomainServices
-	Repositories    Repositories
-	CommandHandlers CommandHandlers
-	QueryHandlers   QueryHandlers
+	DomainServices    DomainServices
+	Repositories      Repositories
+	CommandHandlers   CommandHandlers
+	QueryHandlers     QueryHandlers
+	shutdownCallbacks []shutdownCallback
+}
+
+type shutdownCallback func(ctx context.Context) error
+
+func (r *CompositionRoot) Shutdown(ctx context.Context) {
+	for _, callback := range r.shutdownCallbacks {
+		err := callback(ctx)
+		if err != nil {
+			fmt.Println("shutdown callback failed with error:", err)
+		}
+	}
 }
 
 type DomainServices struct {
@@ -43,7 +57,7 @@ type QueryHandlers struct {
 	GetPendingOrdersQueryHandler inPorts.IGetPendingOrdersQueryHandler
 }
 
-func NewCompositionRoot(_ context.Context, gormDb *gorm.DB) *CompositionRoot {
+func NewCompositionRoot(_ context.Context, gormDb *gorm.DB, geoServiceAddress string) *CompositionRoot {
 	dispatchService, err := services.NewDispatchService()
 	if err != nil {
 		log.Fatalf("faied to create DispatchService: %v", err)
@@ -64,7 +78,16 @@ func NewCompositionRoot(_ context.Context, gormDb *gorm.DB) *CompositionRoot {
 		log.Fatalf("faied to create courier repository: %v", err)
 	}
 
-	createOrderCommandHandler, err := commands.NewCreateOrderCommandHandler(transactionManager, orderRepository)
+	geoClient, err := grpc.NewGeoClient(geoServiceAddress)
+	if err != nil {
+		log.Fatalf("faied to create Geo client: %v", err)
+	}
+
+	createOrderCommandHandler, err := commands.NewCreateOrderCommandHandler(
+		transactionManager,
+		orderRepository,
+		geoClient,
+	)
 	if err != nil {
 		log.Fatalf("faied to create CreateOrderCommandHandler: %v", err)
 	}
@@ -115,6 +138,11 @@ func NewCompositionRoot(_ context.Context, gormDb *gorm.DB) *CompositionRoot {
 		QueryHandlers: QueryHandlers{
 			GetAllCouriersQueryHandler:   getAllCouriersQueryHandler,
 			GetPendingOrdersQueryHandler: getPendingOrdersQueryHandler,
+		},
+		shutdownCallbacks: []shutdownCallback{
+			func(_ context.Context) error {
+				return geoClient.Close()
+			},
 		},
 	}
 

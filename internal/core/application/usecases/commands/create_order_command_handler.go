@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/victor-tsykanov/delivery/internal/common/errors"
-	"github.com/victor-tsykanov/delivery/internal/core/domain/kernel"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/model/order"
 	inPorts "github.com/victor-tsykanov/delivery/internal/core/ports/in"
 	outPorts "github.com/victor-tsykanov/delivery/internal/core/ports/out"
@@ -14,11 +13,13 @@ import (
 type CreateOrderCommandHandler struct {
 	transactionManager outPorts.ITransactionManager
 	orderRepository    outPorts.IOrderRepository
+	geoClient          outPorts.IGeoClient
 }
 
 func NewCreateOrderCommandHandler(
 	transactionManager outPorts.ITransactionManager,
 	orderRepository outPorts.IOrderRepository,
+	geoClient outPorts.IGeoClient,
 ) (*CreateOrderCommandHandler, error) {
 	if transactionManager == nil {
 		return nil, errors.NewValueIsRequiredError("transactionManager")
@@ -28,14 +29,23 @@ func NewCreateOrderCommandHandler(
 		return nil, errors.NewValueIsRequiredError("orderRepository")
 	}
 
+	if geoClient == nil {
+		return nil, errors.NewValueIsRequiredError("geoClient")
+	}
+
 	return &CreateOrderCommandHandler{
 		transactionManager: transactionManager,
 		orderRepository:    orderRepository,
+		geoClient:          geoClient,
 	}, nil
 }
 
 func (h *CreateOrderCommandHandler) Handle(ctx context.Context, command inPorts.CreateOrderCommand) error {
-	location := kernel.RandomLocation()
+	location, err := h.geoClient.GetLocation(ctx, command.Street())
+	if err != nil {
+		return fmt.Errorf("falied to get location for street %s: %w", command.Street(), err)
+	}
+
 	order, err := order.NewOrder(command.ID(), *location)
 	if err != nil {
 		return fmt.Errorf("falied to create order %s: %w", command.ID(), err)
