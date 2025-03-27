@@ -9,6 +9,7 @@ import (
 	"github.com/victor-tsykanov/delivery/internal/adapters/out/postgres"
 	"github.com/victor-tsykanov/delivery/internal/adapters/out/postgres/courier"
 	"github.com/victor-tsykanov/delivery/internal/adapters/out/postgres/order"
+	"github.com/victor-tsykanov/delivery/internal/common/persistence"
 	"github.com/victor-tsykanov/delivery/internal/core/application/usecases/commands"
 	"github.com/victor-tsykanov/delivery/internal/core/application/usecases/queries"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/services"
@@ -41,7 +42,7 @@ type DomainServices struct {
 }
 
 type Repositories struct {
-	TransactionManager outPorts.ITransactionManager
+	TransactionManager persistence.ITransactionManager
 	CourierRepository  outPorts.ICourierRepository
 	OrderRepository    outPorts.IOrderRepository
 }

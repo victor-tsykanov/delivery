@@ -10,6 +10,7 @@ import (
 	"github.com/victor-tsykanov/delivery/internal/core/application/usecases/commands"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/model/courier"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/model/order"
+	"github.com/victor-tsykanov/delivery/mocks/github.com/victor-tsykanov/delivery/internal_/common/persistence"
 	outPorts "github.com/victor-tsykanov/delivery/mocks/github.com/victor-tsykanov/delivery/internal_/core/ports/out"
 )
 
@@ -17,7 +18,7 @@ func TestMoveCouriersCommandHandler_Handle(t *testing.T) {
 	// Arrange
 	ctx := context.Background()
 
-	transactionManager := outPorts.NewMockITransactionManager(t)
+	transactionManager := persistence.NewMockITransactionManager(t)
 	orderRepository := outPorts.NewMockIOrderRepository(t)
 	courierRepository := outPorts.NewMockICourierRepository(t)
 

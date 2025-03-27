@@ -5,19 +5,20 @@ import (
 	"fmt"
 
 	"github.com/victor-tsykanov/delivery/internal/common/errors"
+	"github.com/victor-tsykanov/delivery/internal/common/persistence"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/model/order"
 	inPorts "github.com/victor-tsykanov/delivery/internal/core/ports/in"
 	outPorts "github.com/victor-tsykanov/delivery/internal/core/ports/out"
 )
 
 type CreateOrderCommandHandler struct {
-	transactionManager outPorts.ITransactionManager
+	transactionManager persistence.ITransactionManager
 	orderRepository    outPorts.IOrderRepository
 	geoClient          outPorts.IGeoClient
 }
 
 func NewCreateOrderCommandHandler(
-	transactionManager outPorts.ITransactionManager,
+	transactionManager persistence.ITransactionManager,
 	orderRepository outPorts.IOrderRepository,
 	geoClient outPorts.IGeoClient,
 ) (*CreateOrderCommandHandler, error) {

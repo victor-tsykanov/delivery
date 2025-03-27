@@ -5,20 +5,21 @@ import (
 	"fmt"
 
 	"github.com/victor-tsykanov/delivery/internal/common/errors"
+	"github.com/victor-tsykanov/delivery/internal/common/persistence"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/model/order"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/services"
 	outPorts "github.com/victor-tsykanov/delivery/internal/core/ports/out"
 )
 
 type AssignOrdersCommandHandler struct {
-	transactionManager outPorts.ITransactionManager
+	transactionManager persistence.ITransactionManager
 	dispatchService    services.IDispatchService
 	courierRepository  outPorts.ICourierRepository
 	orderRepository    outPorts.IOrderRepository
 }
 
 func NewAssignOrdersCommandHandler(
-	transactionManager outPorts.ITransactionManager,
+	transactionManager persistence.ITransactionManager,
 	dispatchService services.IDispatchService,
 	courierRepository outPorts.ICourierRepository,
 	orderRepository outPorts.IOrderRepository,

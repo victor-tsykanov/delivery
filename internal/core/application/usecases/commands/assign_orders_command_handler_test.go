@@ -11,6 +11,7 @@ import (
 	"github.com/victor-tsykanov/delivery/internal/core/application/usecases/commands"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/model/courier"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/model/order"
+	"github.com/victor-tsykanov/delivery/mocks/github.com/victor-tsykanov/delivery/internal_/common/persistence"
 	"github.com/victor-tsykanov/delivery/mocks/github.com/victor-tsykanov/delivery/internal_/core/domain/services"
 	outPorts "github.com/victor-tsykanov/delivery/mocks/github.com/victor-tsykanov/delivery/internal_/core/ports/out"
 )
@@ -26,7 +27,7 @@ func TestAssignOrdersCommandHandler_Handle(t *testing.T) {
 	courier2 := courier.Fixtures.FreeCourier()
 	courier3 := courier.Fixtures.FreeCourier()
 
-	transactionManager := outPorts.NewMockITransactionManager(t)
+	transactionManager := persistence.NewMockITransactionManager(t)
 	orderRepository := outPorts.NewMockIOrderRepository(t)
 	courierRepository := outPorts.NewMockICourierRepository(t)
 	dispatchService := services.NewMockIDispatchService(t)
@@ -127,7 +128,7 @@ func TestAssignOrdersCommandHandler_Handle_FailsWhenNotEnoughFreeCouriersAvailab
 
 	courier1 := courier.Fixtures.FreeCourier()
 
-	transactionManager := outPorts.NewMockITransactionManager(t)
+	transactionManager := persistence.NewMockITransactionManager(t)
 	orderRepository := outPorts.NewMockIOrderRepository(t)
 	courierRepository := outPorts.NewMockICourierRepository(t)
 	dispatchService := services.NewMockIDispatchService(t)

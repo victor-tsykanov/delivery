@@ -6,18 +6,19 @@ import (
 	"fmt"
 
 	commonErrors "github.com/victor-tsykanov/delivery/internal/common/errors"
+	"github.com/victor-tsykanov/delivery/internal/common/persistence"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/model/order"
 	outPorts "github.com/victor-tsykanov/delivery/internal/core/ports/out"
 )
 
 type MoveCouriersCommandHandler struct {
-	transactionManager outPorts.ITransactionManager
+	transactionManager persistence.ITransactionManager
 	courierRepository  outPorts.ICourierRepository
 	orderRepository    outPorts.IOrderRepository
 }
 
 func NewMoveCouriersCommandHandler(
-	transactionManager outPorts.ITransactionManager,
+	transactionManager persistence.ITransactionManager,
 	courierRepository outPorts.ICourierRepository,
 	orderRepository outPorts.IOrderRepository,
 ) (*MoveCouriersCommandHandler, error) {

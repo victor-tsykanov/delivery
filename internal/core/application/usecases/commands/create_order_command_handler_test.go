@@ -12,6 +12,7 @@ import (
 	"github.com/victor-tsykanov/delivery/internal/core/domain/kernel"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/model/order"
 	inPorts "github.com/victor-tsykanov/delivery/internal/core/ports/in"
+	"github.com/victor-tsykanov/delivery/mocks/github.com/victor-tsykanov/delivery/internal_/common/persistence"
 	outPorts "github.com/victor-tsykanov/delivery/mocks/github.com/victor-tsykanov/delivery/internal_/core/ports/out"
 )
 
@@ -22,7 +23,7 @@ func TestCreateOrderCommandHandler_Handle(t *testing.T) {
 	street := gofakeit.Address().Address
 	location := kernel.RandomLocation()
 
-	transactionManager := outPorts.NewMockITransactionManager(t)
+	transactionManager := persistence.NewMockITransactionManager(t)
 	orderRepository := outPorts.NewMockIOrderRepository(t)
 	geoClient := outPorts.NewMockIGeoClient(t)
 
