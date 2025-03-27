@@ -4,11 +4,17 @@ packages:
   github.com/victor-tsykanov/delivery/internal/common/persistence:
     interfaces:
       ITransactionManager:
+  github.com/victor-tsykanov/delivery/internal/core/domain/services:
+    interfaces:
+      IDispatchService:
+  github.com/victor-tsykanov/delivery/internal/core/ports/in:
+    interfaces:
+      ICreateOrderCommandHandler:
+      IGetAllCouriersQueryHandler:
+      IGetPendingOrdersQueryHandler:
   github.com/victor-tsykanov/delivery/internal/core/ports/out:
     interfaces:
       ICourierRepository:
       IOrderRepository:
       IGeoClient:
-  github.com/victor-tsykanov/delivery/internal/core/domain/services:
-    interfaces:
-      IDispatchService:
+
