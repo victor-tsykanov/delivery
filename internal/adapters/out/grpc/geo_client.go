@@ -5,14 +5,14 @@ import (
 	"fmt"
 
 	"github.com/victor-tsykanov/delivery/internal/core/domain/kernel"
-	"github.com/victor-tsykanov/delivery/pkg/clients/geo"
+	"github.com/victor-tsykanov/delivery/pkg/clients/geopb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 type GeoClient struct {
 	grpcConnection *grpc.ClientConn
-	grpcGeoClient  geo.GeoClient
+	grpcGeoClient  geopb.GeoClient
 }
 
 func NewGeoClient(geoServiceAddress string) (*GeoClient, error) {
@@ -24,7 +24,7 @@ func NewGeoClient(geoServiceAddress string) (*GeoClient, error) {
 		return nil, fmt.Errorf("failed to create gRPC Geo client: %w", err)
 	}
 
-	grpcGeoClient := geo.NewGeoClient(connection)
+	grpcGeoClient := geopb.NewGeoClient(connection)
 
 	return &GeoClient{
 		grpcConnection: connection,
@@ -33,7 +33,7 @@ func NewGeoClient(geoServiceAddress string) (*GeoClient, error) {
 }
 
 func (c *GeoClient) GetLocation(ctx context.Context, street string) (*kernel.Location, error) {
-	request := &geo.GetGeolocationRequest{Street: street}
+	request := &geopb.GetGeolocationRequest{Street: street}
 	response, err := c.grpcGeoClient.GetGeolocation(ctx, request)
 	if err != nil {
 		return nil, fmt.Errorf("request to Geo service failed: %w", err)

@@ -4,7 +4,7 @@
 // - protoc             v5.29.3
 // source: contract.proto
 
-package geo
+package geopb
 
 import (
 	context "context"
@@ -19,7 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Geo_GetGeolocation_FullMethodName = "/Geo/GetGeolocation"
+	Geo_GetGeolocation_FullMethodName = "/geo.Geo/GetGeolocation"
 )
 
 // GeoClient is the client API for Geo service.
@@ -114,7 +114,7 @@ func _Geo_GetGeolocation_Handler(srv interface{}, ctx context.Context, dec func(
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Geo_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "Geo",
+	ServiceName: "geo.Geo",
 	HandlerType: (*GeoServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
