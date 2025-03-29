@@ -4,7 +4,7 @@
 // 	protoc        v5.29.3
 // source: contract.proto
 
-package geo
+package geopb
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -212,18 +212,18 @@ var File_contract_proto protoreflect.FileDescriptor
 
 const file_contract_proto_rawDesc = "" +
 	"\n" +
-	"\x0econtract.proto\"/\n" +
+	"\x0econtract.proto\x12\x03geo\"/\n" +
 	"\x15GetGeolocationRequest\x12\x16\n" +
-	"\x06Street\x18\x01 \x01(\tR\x06Street\"<\n" +
-	"\x13GetGeolocationReply\x12%\n" +
-	"\bLocation\x18\x01 \x01(\v2\t.LocationR\bLocation\"&\n" +
+	"\x06Street\x18\x01 \x01(\tR\x06Street\"@\n" +
+	"\x13GetGeolocationReply\x12)\n" +
+	"\bLocation\x18\x01 \x01(\v2\r.geo.LocationR\bLocation\"&\n" +
 	"\bLocation\x12\f\n" +
 	"\x01x\x18\x01 \x01(\x05R\x01x\x12\f\n" +
 	"\x01y\x18\x02 \x01(\x05R\x01y\"#\n" +
 	"\rErrorResponse\x12\x12\n" +
-	"\x04text\x18\x01 \x01(\tR\x04text2E\n" +
-	"\x03Geo\x12>\n" +
-	"\x0eGetGeolocation\x12\x16.GetGeolocationRequest\x1a\x14.GetGeolocationReplyB\r\xaa\x02\n" +
+	"\x04text\x18\x01 \x01(\tR\x04text2M\n" +
+	"\x03Geo\x12F\n" +
+	"\x0eGetGeolocation\x12\x1a.geo.GetGeolocationRequest\x1a\x18.geo.GetGeolocationReplyB\x1bZ\fgeosrv/geopb\xaa\x02\n" +
 	"GeoApp.Apib\x06proto3"
 
 var (
@@ -240,15 +240,15 @@ func file_contract_proto_rawDescGZIP() []byte {
 
 var file_contract_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_contract_proto_goTypes = []any{
-	(*GetGeolocationRequest)(nil), // 0: GetGeolocationRequest
-	(*GetGeolocationReply)(nil),   // 1: GetGeolocationReply
-	(*Location)(nil),              // 2: Location
-	(*ErrorResponse)(nil),         // 3: ErrorResponse
+	(*GetGeolocationRequest)(nil), // 0: geo.GetGeolocationRequest
+	(*GetGeolocationReply)(nil),   // 1: geo.GetGeolocationReply
+	(*Location)(nil),              // 2: geo.Location
+	(*ErrorResponse)(nil),         // 3: geo.ErrorResponse
 }
 var file_contract_proto_depIdxs = []int32{
-	2, // 0: GetGeolocationReply.Location:type_name -> Location
-	0, // 1: Geo.GetGeolocation:input_type -> GetGeolocationRequest
-	1, // 2: Geo.GetGeolocation:output_type -> GetGeolocationReply
+	2, // 0: geo.GetGeolocationReply.Location:type_name -> geo.Location
+	0, // 1: geo.Geo.GetGeolocation:input_type -> geo.GetGeolocationRequest
+	1, // 2: geo.Geo.GetGeolocation:output_type -> geo.GetGeolocationReply
 	2, // [2:3] is the sub-list for method output_type
 	1, // [1:2] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

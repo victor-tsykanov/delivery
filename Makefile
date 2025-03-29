@@ -20,14 +20,12 @@ generate-delivery-api:
 
 generate-geo-api:
 	wget https://gitlab.com/microarch-ru/ddd-in-practice/system-design/-/raw/main/services/geo/contracts/contract.proto -O api/geo/contract.proto
-	rm -rf pkg/clients/geo
-	mkdir -p pkg/clients/geo
+	rm -rf pkg/clients/geopb
+	mkdir -p pkg/clients/geopb
 	protoc --proto_path api/geo \
-		--go_out=pkg/clients/geo --go_opt=paths=source_relative \
-		--go_opt=Mcontract.proto=github.com/victor-tsykanov/delivery/pkg/cliets/geo \
+		--go_out=pkg/clients/geopb --go_opt=paths=source_relative \
 		--plugin=protoc-gen-go=bin/protoc-gen-go \
-		--go-grpc_out=pkg/clients/geo --go-grpc_opt=paths=source_relative \
-		--go-grpc_opt=Mcontract.proto=github.com/victor-tsykanov/delivery/pkg/cliets/geo \
+		--go-grpc_out=pkg/clients/geopb --go-grpc_opt=paths=source_relative \
 		--plugin=protoc-gen-go-grpc=bin/protoc-gen-go-grpc \
 		api/geo/contract.proto
 
