@@ -7,7 +7,7 @@ install-deps:
 	GOBIN=$(LOCAL_BIN) go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.6
 	GOBIN=$(LOCAL_BIN) go install -mod=mod google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
 
-generate: generate-mocks generate-delivery-api generate-geo-api
+generate: generate-mocks generate-delivery-api generate-geo-api generate-queues-events
 
 generate-mocks:
 	rm -rf mocks
@@ -28,6 +28,10 @@ generate-geo-api:
 		--go-grpc_out=pkg/clients/geopb --go-grpc_opt=paths=source_relative \
 		--plugin=protoc-gen-go-grpc=bin/protoc-gen-go-grpc \
 		api/geo/contract.proto
+
+generate-queues-events:
+	wget https://gitlab.com/microarch-ru/ddd-in-practice/system-design/-/raw/main/services/basket/contracts/basket_confirmed.proto -O api/basket/queues/basket_confirmed.proto
+	protoc --go_out=./pkg --plugin=protoc-gen-go=bin/protoc-gen-go api/basket/queues/basket_confirmed.proto
 
 test:
 	go test ./...

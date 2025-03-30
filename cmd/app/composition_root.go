@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/victor-tsykanov/delivery/internal/adapters/in/kafka"
 	"github.com/victor-tsykanov/delivery/internal/adapters/out/grpc"
 	"github.com/victor-tsykanov/delivery/internal/adapters/out/postgres"
 	"github.com/victor-tsykanov/delivery/internal/adapters/out/postgres/courier"
 	"github.com/victor-tsykanov/delivery/internal/adapters/out/postgres/order"
+	"github.com/victor-tsykanov/delivery/internal/common/config"
 	"github.com/victor-tsykanov/delivery/internal/common/persistence"
 	"github.com/victor-tsykanov/delivery/internal/core/application/usecases/commands"
 	"github.com/victor-tsykanov/delivery/internal/core/application/usecases/queries"
@@ -23,6 +25,7 @@ type CompositionRoot struct {
 	Repositories      Repositories
 	CommandHandlers   CommandHandlers
 	QueryHandlers     QueryHandlers
+	QueueConsumers    QueueConsumers
 	shutdownCallbacks []shutdownCallback
 }
 
@@ -58,7 +61,16 @@ type QueryHandlers struct {
 	GetPendingOrdersQueryHandler inPorts.IGetPendingOrdersQueryHandler
 }
 
-func NewCompositionRoot(_ context.Context, gormDb *gorm.DB, geoServiceAddress string) *CompositionRoot {
+type QueueConsumers struct {
+	BasketConfirmedConsumer *kafka.BasketConfirmedConsumer
+}
+
+func NewCompositionRoot(
+	_ context.Context,
+	gormDb *gorm.DB,
+	geoServiceAddress string,
+	kafkaConfig *config.KafkaConfig,
+) *CompositionRoot {
 	dispatchService, err := services.NewDispatchService()
 	if err != nil {
 		log.Fatalf("faied to create DispatchService: %v", err)
@@ -122,6 +134,11 @@ func NewCompositionRoot(_ context.Context, gormDb *gorm.DB, geoServiceAddress st
 		log.Fatalf("faied to create GetPendingOrdersQueryHandler: %v", err)
 	}
 
+	basketConfirmedConsumer, err := kafka.NewBasketConfirmedConsumer(createOrderCommandHandler, kafkaConfig)
+	if err != nil {
+		log.Fatalf("faied to create BasketConfirmedConsumer: %v", err)
+	}
+
 	compositionRoot := CompositionRoot{
 		DomainServices: DomainServices{
 			DispatchService: dispatchService,
@@ -140,9 +157,15 @@ func NewCompositionRoot(_ context.Context, gormDb *gorm.DB, geoServiceAddress st
 			GetAllCouriersQueryHandler:   getAllCouriersQueryHandler,
 			GetPendingOrdersQueryHandler: getPendingOrdersQueryHandler,
 		},
+		QueueConsumers: QueueConsumers{
+			BasketConfirmedConsumer: basketConfirmedConsumer,
+		},
 		shutdownCallbacks: []shutdownCallback{
 			func(_ context.Context) error {
 				return geoClient.Close()
+			},
+			func(_ context.Context) error {
+				return basketConfirmedConsumer.Close()
 			},
 		},
 	}
