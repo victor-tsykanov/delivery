@@ -1,4 +1,4 @@
-package courier
+package courier_test
 
 import (
 	"log"
@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/victor-tsykanov/delivery/internal/common/errors"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/kernel"
+	"github.com/victor-tsykanov/delivery/internal/core/domain/model/courier"
 )
 
 func TestNewCourier(t *testing.T) {
@@ -65,7 +66,7 @@ func TestNewCourier(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			courier, err := NewCourier(
+			theCourier, err := courier.NewCourier(
 				tt.courierName,
 				tt.transportName,
 				tt.transportSpeed,
@@ -74,17 +75,17 @@ func TestNewCourier(t *testing.T) {
 
 			if tt.wantErr != nil {
 				assert.Equal(t, tt.wantErr, err)
-				assert.Nil(t, courier)
+				assert.Nil(t, theCourier)
 
 				return
 			}
 
-			assert.NotNil(t, courier)
-			assert.Equal(t, tt.courierName, courier.Name())
-			assert.Equal(t, tt.transportName, courier.Transport().Name())
-			assert.Equal(t, tt.transportSpeed, courier.Transport().Speed())
-			assert.Equal(t, tt.location, courier.Location())
-			assert.Equal(t, StatusFree, courier.Status())
+			assert.NotNil(t, theCourier)
+			assert.Equal(t, tt.courierName, theCourier.Name())
+			assert.Equal(t, tt.transportName, theCourier.Transport().Name())
+			assert.Equal(t, tt.transportSpeed, theCourier.Transport().Speed())
+			assert.Equal(t, tt.location, theCourier.Location())
+			assert.Equal(t, courier.StatusFree, theCourier.Status())
 		})
 	}
 }
@@ -92,20 +93,20 @@ func TestNewCourier(t *testing.T) {
 func TestCourier_SetBusy(t *testing.T) {
 	tests := []struct {
 		name       string
-		courier    *Courier
-		wantStatus Status
+		courier    *courier.Courier
+		wantStatus courier.Status
 		wantErr    error
 	}{
 		{
 			name:       "free courier",
-			courier:    Fixtures.FreeCourier(),
-			wantStatus: StatusBusy,
+			courier:    courier.Fixtures.FreeCourier(),
+			wantStatus: courier.StatusBusy,
 			wantErr:    nil,
 		},
 		{
 			name:       "busy courier",
-			courier:    Fixtures.BusyCourier(),
-			wantStatus: StatusBusy,
+			courier:    courier.Fixtures.BusyCourier(),
+			wantStatus: courier.StatusBusy,
 			wantErr:    errors.NewInvalidStateError("courier must be free"),
 		},
 	}
@@ -123,20 +124,20 @@ func TestCourier_SetBusy(t *testing.T) {
 func TestCourier_SetFree(t *testing.T) {
 	tests := []struct {
 		name       string
-		courier    *Courier
-		wantStatus Status
+		courier    *courier.Courier
+		wantStatus courier.Status
 		wantErr    error
 	}{
 		{
 			name:       "free courier",
-			courier:    Fixtures.FreeCourier(),
-			wantStatus: StatusFree,
+			courier:    courier.Fixtures.FreeCourier(),
+			wantStatus: courier.StatusFree,
 			wantErr:    errors.NewInvalidStateError("courier must be busy"),
 		},
 		{
 			name:       "busy courier",
-			courier:    Fixtures.BusyCourier(),
-			wantStatus: StatusFree,
+			courier:    courier.Fixtures.BusyCourier(),
+			wantStatus: courier.StatusFree,
 			wantErr:    nil,
 		},
 	}
@@ -156,13 +157,13 @@ func TestCourier_Move(t *testing.T) {
 	targetLocation := newLocation(1, 9)
 	expectedLocation := newLocation(1, 4)
 
-	courier, err := NewCourier("John Doe", "Car", 3, currentLocation)
+	john, err := courier.NewCourier("John Doe", "Car", 3, currentLocation)
 	require.NoError(t, err)
 
-	err = courier.Move(targetLocation)
+	err = john.Move(targetLocation)
 
 	assert.NoError(t, err)
-	assert.Equal(t, expectedLocation, courier.Location())
+	assert.Equal(t, expectedLocation, john.Location())
 }
 
 func TestCourier_CalculateStepsToLocation(t *testing.T) {
@@ -194,10 +195,10 @@ func TestCourier_CalculateStepsToLocation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			courier, err := NewCourier("John Doe", "Car", 3, tt.from)
+			john, err := courier.NewCourier("John Doe", "Car", 3, tt.from)
 			require.NoError(t, err)
 
-			steps, err := courier.CalculateStepsToLocation(tt.to)
+			steps, err := john.CalculateStepsToLocation(tt.to)
 
 			assert.NoError(t, err)
 			assert.Equal(t, tt.want, steps)

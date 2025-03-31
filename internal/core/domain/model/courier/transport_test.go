@@ -1,4 +1,4 @@
-package courier
+package courier_test
 
 import (
 	"testing"
@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/victor-tsykanov/delivery/internal/common/errors"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/kernel"
+	"github.com/victor-tsykanov/delivery/internal/core/domain/model/courier"
 )
 
 func TestNewTransport(t *testing.T) {
@@ -22,17 +23,11 @@ func TestNewTransport(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    *Transport
 		wantErr error
 	}{
 		{
 			name: "valid",
 			args: args{
-				id:    carID,
-				name:  "Car",
-				speed: 2,
-			},
-			want: &Transport{
 				id:    carID,
 				name:  "Car",
 				speed: 2,
@@ -46,7 +41,6 @@ func TestNewTransport(t *testing.T) {
 				name:  "",
 				speed: 3,
 			},
-			want:    nil,
 			wantErr: errors.NewValueIsRequiredError("name"),
 		},
 		{
@@ -56,7 +50,6 @@ func TestNewTransport(t *testing.T) {
 				name:  "Car",
 				speed: 0,
 			},
-			want:    nil,
 			wantErr: errors.NewValueIsOutOfRangeError("speed", 0, 1, 3),
 		},
 		{
@@ -66,24 +59,27 @@ func TestNewTransport(t *testing.T) {
 				name:  "Car",
 				speed: 4,
 			},
-			want:    nil,
 			wantErr: errors.NewValueIsOutOfRangeError("speed", 4, 1, 3),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			transport, err := NewTransport(tt.args.id, tt.args.name, tt.args.speed)
+			transport, err := courier.NewTransport(tt.args.id, tt.args.name, tt.args.speed)
 
-			assert.Equal(t, tt.want, transport)
 			assert.Equal(t, tt.wantErr, err)
+			if tt.wantErr == nil {
+				assert.Equal(t, tt.args.id, transport.ID())
+				assert.Equal(t, tt.args.name, transport.Name())
+				assert.Equal(t, tt.args.speed, transport.Speed())
+			}
 		})
 	}
 }
 
 func TestTransport_Equals(t *testing.T) {
-	transport := func(id uuid.UUID, name string, speed int) *Transport {
-		transport, err := NewTransport(id, name, speed)
+	transport := func(id uuid.UUID, name string, speed int) *courier.Transport {
+		transport, err := courier.NewTransport(id, name, speed)
 		require.NoError(t, err)
 
 		return transport
@@ -93,8 +89,8 @@ func TestTransport_Equals(t *testing.T) {
 
 	tests := []struct {
 		name   string
-		first  *Transport
-		second *Transport
+		first  *courier.Transport
+		second *courier.Transport
 		want   bool
 	}{
 		{
@@ -128,7 +124,7 @@ func TestTransport_Move(t *testing.T) {
 		return location
 	}
 
-	car, err := NewTransport(uuid.New(), "Car", 3)
+	car, err := courier.NewTransport(uuid.New(), "Car", 3)
 	require.NoError(t, err)
 
 	tests := []struct {

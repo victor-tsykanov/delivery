@@ -1,4 +1,4 @@
-package services
+package services_test
 
 import (
 	"testing"
@@ -10,6 +10,7 @@ import (
 	"github.com/victor-tsykanov/delivery/internal/core/domain/kernel"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/model/courier"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/model/order"
+	"github.com/victor-tsykanov/delivery/internal/core/domain/services"
 )
 
 func TestDispatchService_Dispatch(t *testing.T) {
@@ -63,7 +64,7 @@ func TestDispatchService_Dispatch(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			service, err := NewDispatchService()
+			service, err := services.NewDispatchService()
 			require.NoError(t, err)
 
 			chosenCourier, err := service.Dispatch(theOrder, tt.couriers)

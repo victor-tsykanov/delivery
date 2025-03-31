@@ -1,4 +1,4 @@
-package order
+package order_test
 
 import (
 	"testing"
@@ -9,6 +9,7 @@ import (
 	"github.com/victor-tsykanov/delivery/internal/common/errors"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/kernel"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/model/courier"
+	"github.com/victor-tsykanov/delivery/internal/core/domain/model/order"
 )
 
 func TestNewOrder(t *testing.T) {
@@ -37,20 +38,20 @@ func TestNewOrder(t *testing.T) {
 
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			order, err := NewOrder(tt.id, tt.location)
+			theOrder, err := order.NewOrder(tt.id, tt.location)
 
 			if tt.wantErr != nil {
 				assert.Equal(t, tt.wantErr, err)
-				assert.Nil(t, order)
+				assert.Nil(t, theOrder)
 				return
 			}
 
 			assert.NoError(t, err)
-			assert.NotNil(t, order)
-			assert.Equal(t, tt.id, order.ID())
-			assert.Equal(t, tt.location, order.Location())
-			assert.Equal(t, StatusCreated, order.Status())
-			assert.Nil(t, order.CourierID())
+			assert.NotNil(t, theOrder)
+			assert.Equal(t, tt.id, theOrder.ID())
+			assert.Equal(t, tt.location, theOrder.Location())
+			assert.Equal(t, order.StatusCreated, theOrder.Status())
+			assert.Nil(t, theOrder.CourierID())
 		})
 	}
 }
@@ -58,22 +59,22 @@ func TestNewOrder(t *testing.T) {
 func TestOrder_Assign(t *testing.T) {
 	tests := []struct {
 		name    string
-		order   *Order
+		order   *order.Order
 		wantErr error
 	}{
 		{
 			name:    "unassigned order",
-			order:   Fixtures.UnassignedOrder(),
+			order:   order.Fixtures.UnassignedOrder(),
 			wantErr: nil,
 		},
 		{
 			name:    "assigned order",
-			order:   Fixtures.AssignedOrder(),
+			order:   order.Fixtures.AssignedOrder(),
 			wantErr: errors.NewInvalidStateError("order is already assigned"),
 		},
 		{
 			name:    "completed order",
-			order:   Fixtures.CompletedOrder(),
+			order:   order.Fixtures.CompletedOrder(),
 			wantErr: errors.NewInvalidStateError("order is completed"),
 		},
 	}
@@ -94,7 +95,7 @@ func TestOrder_Assign(t *testing.T) {
 			}
 
 			assert.NoError(t, err)
-			assert.Equal(t, StatusAssigned, tt.order.Status())
+			assert.Equal(t, order.StatusAssigned, tt.order.Status())
 			assert.Equal(t, bob.ID(), *(tt.order.CourierID()))
 		})
 	}
@@ -103,22 +104,22 @@ func TestOrder_Assign(t *testing.T) {
 func TestOrder_Complete(t *testing.T) {
 	tests := []struct {
 		name    string
-		order   *Order
+		order   *order.Order
 		wantErr error
 	}{
 		{
 			name:    "assigned order",
-			order:   Fixtures.AssignedOrder(),
+			order:   order.Fixtures.AssignedOrder(),
 			wantErr: nil,
 		},
 		{
 			name:    "unassigned order",
-			order:   Fixtures.UnassignedOrder(),
+			order:   order.Fixtures.UnassignedOrder(),
 			wantErr: errors.NewInvalidStateError("order needs to be assigned"),
 		},
 		{
 			name:    "completed order",
-			order:   Fixtures.CompletedOrder(),
+			order:   order.Fixtures.CompletedOrder(),
 			wantErr: errors.NewInvalidStateError("order is already completed"),
 		},
 	}
@@ -137,7 +138,7 @@ func TestOrder_Complete(t *testing.T) {
 			}
 
 			assert.NoError(t, err)
-			assert.Equal(t, StatusCompleted, tt.order.Status())
+			assert.Equal(t, order.StatusCompleted, tt.order.Status())
 		})
 	}
 }
@@ -147,16 +148,16 @@ func TestRestoreOrder(t *testing.T) {
 	location := kernel.RandomLocation()
 	courierID := uuid.New()
 
-	order := RestoreOrder(
+	theOrder := order.RestoreOrder(
 		orderID,
 		location,
-		StatusCompleted,
+		order.StatusCompleted,
 		&courierID,
 	)
 
-	require.NotNil(t, order)
-	assert.Equal(t, orderID, order.ID())
-	assert.Equal(t, *location, order.Location())
-	assert.Equal(t, StatusCompleted, order.Status())
-	assert.Equal(t, &courierID, order.CourierID())
+	require.NotNil(t, theOrder)
+	assert.Equal(t, orderID, theOrder.ID())
+	assert.Equal(t, *location, theOrder.Location())
+	assert.Equal(t, order.StatusCompleted, theOrder.Status())
+	assert.Equal(t, &courierID, theOrder.CourierID())
 }

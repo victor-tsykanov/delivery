@@ -40,6 +40,15 @@ func (l *Location) Y() int {
 	return l.y
 }
 
+func MustNewLocation(x int, y int) *Location {
+	location, err := NewLocation(x, y)
+	if err != nil {
+		log.Fatalf("failed to create location: %v", err)
+	}
+
+	return location
+}
+
 //nolint:gosec
 func RandomLocation() *Location {
 	location, err := NewLocation(
