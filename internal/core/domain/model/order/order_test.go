@@ -15,21 +15,21 @@ import (
 func TestNewOrder(t *testing.T) {
 	testCases := []struct {
 		name      string
-		id        uuid.UUID
+		id        order.ID
 		location  kernel.Location
 		wantErr   error
 		wantOrder bool
 	}{
 		{
 			name:      "valid order",
-			id:        uuid.New(),
+			id:        order.NewID(),
 			location:  *kernel.RandomLocation(),
 			wantErr:   nil,
 			wantOrder: true,
 		},
 		{
 			name:      "empty id",
-			id:        uuid.Nil,
+			id:        order.ID(uuid.Nil),
 			location:  *kernel.RandomLocation(),
 			wantErr:   errors.NewValueIsRequiredError("id"),
 			wantOrder: false,
@@ -144,9 +144,9 @@ func TestOrder_Complete(t *testing.T) {
 }
 
 func TestRestoreOrder(t *testing.T) {
-	orderID := uuid.New()
+	orderID := order.NewID()
 	location := kernel.RandomLocation()
-	courierID := uuid.New()
+	courierID := courier.NewID()
 
 	theOrder := order.RestoreOrder(
 		orderID,

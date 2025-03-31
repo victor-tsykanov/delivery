@@ -9,13 +9,19 @@ import (
 	"github.com/victor-tsykanov/delivery/internal/core/domain/kernel"
 )
 
+type TransportID uuid.UUID
+
+func NewTransportID() TransportID {
+	return TransportID(uuid.New())
+}
+
 type Transport struct {
-	id    uuid.UUID
+	id    TransportID
 	name  string
 	speed int
 }
 
-func NewTransport(id uuid.UUID, name string, speed int) (*Transport, error) {
+func NewTransport(id TransportID, name string, speed int) (*Transport, error) {
 	err := validateTransportName(name, "name")
 	if err != nil {
 		return nil, err
@@ -33,7 +39,7 @@ func NewTransport(id uuid.UUID, name string, speed int) (*Transport, error) {
 	}, nil
 }
 
-func (t *Transport) ID() uuid.UUID {
+func (t *Transport) ID() TransportID {
 	return t.id
 }
 
@@ -84,7 +90,7 @@ func validateTransportSpeed(value int, paramName string) error {
 	return nil
 }
 
-func RestoreTransport(id uuid.UUID, name string, speed int) *Transport {
+func RestoreTransport(id TransportID, name string, speed int) *Transport {
 	return &Transport{
 		id:    id,
 		name:  name,

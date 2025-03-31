@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/victor-tsykanov/delivery/internal/adapters/out/postgres"
 	"github.com/victor-tsykanov/delivery/internal/common/errors"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/model/courier"
@@ -37,7 +36,7 @@ func (r *Repository) Update(ctx context.Context, courier *courier.Courier) error
 	return tx.Save(courierRecord).Error
 }
 
-func (r *Repository) Get(ctx context.Context, id uuid.UUID) (*courier.Courier, error) {
+func (r *Repository) Get(ctx context.Context, id courier.ID) (*courier.Courier, error) {
 	courierRecord := &Courier{}
 
 	tx := postgres.GetTransactionFromContext(ctx, r.db)

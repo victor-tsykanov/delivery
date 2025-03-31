@@ -7,15 +7,25 @@ import (
 	"github.com/victor-tsykanov/delivery/internal/core/domain/model/courier"
 )
 
-type Order struct {
-	id        uuid.UUID
-	location  kernel.Location
-	status    Status
-	courierID *uuid.UUID
+type ID uuid.UUID
+
+func (i ID) IsNil() bool {
+	return uuid.UUID(i) == uuid.Nil
 }
 
-func NewOrder(id uuid.UUID, location kernel.Location) (*Order, error) {
-	if id == uuid.Nil {
+func NewID() ID {
+	return ID(uuid.New())
+}
+
+type Order struct {
+	id        ID
+	location  kernel.Location
+	status    Status
+	courierID *courier.ID
+}
+
+func NewOrder(id ID, location kernel.Location) (*Order, error) {
+	if id.IsNil() {
 		return nil, errors.NewValueIsRequiredError("id")
 	}
 
@@ -26,7 +36,7 @@ func NewOrder(id uuid.UUID, location kernel.Location) (*Order, error) {
 	}, nil
 }
 
-func (o *Order) ID() uuid.UUID {
+func (o *Order) ID() ID {
 	return o.id
 }
 
@@ -38,7 +48,7 @@ func (o *Order) Status() Status {
 	return o.status
 }
 
-func (o *Order) CourierID() *uuid.UUID {
+func (o *Order) CourierID() *courier.ID {
 	return o.courierID
 }
 
@@ -86,7 +96,7 @@ func (o *Order) Complete() error {
 	return nil
 }
 
-func RestoreOrder(id uuid.UUID, location *kernel.Location, status Status, courierID *uuid.UUID) *Order {
+func RestoreOrder(id ID, location *kernel.Location, status Status, courierID *courier.ID) *Order {
 	return &Order{
 		id:        id,
 		location:  *location,

@@ -3,7 +3,6 @@ package courier_test
 import (
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/victor-tsykanov/delivery/internal/common/errors"
@@ -13,12 +12,12 @@ import (
 
 func TestNewTransport(t *testing.T) {
 	type args struct {
-		id    uuid.UUID
+		id    courier.TransportID
 		name  string
 		speed int
 	}
 
-	carID := uuid.New()
+	carID := courier.NewTransportID()
 
 	tests := []struct {
 		name    string
@@ -78,14 +77,14 @@ func TestNewTransport(t *testing.T) {
 }
 
 func TestTransport_Equals(t *testing.T) {
-	transport := func(id uuid.UUID, name string, speed int) *courier.Transport {
+	transport := func(id courier.TransportID, name string, speed int) *courier.Transport {
 		transport, err := courier.NewTransport(id, name, speed)
 		require.NoError(t, err)
 
 		return transport
 	}
 
-	id := uuid.New()
+	id := courier.NewTransportID()
 
 	tests := []struct {
 		name   string
@@ -102,7 +101,7 @@ func TestTransport_Equals(t *testing.T) {
 		{
 			name:   "not equal",
 			first:  transport(id, "First", 1),
-			second: transport(uuid.New(), "Second", 1),
+			second: transport(courier.NewTransportID(), "Second", 1),
 			want:   false,
 		},
 	}
@@ -124,7 +123,7 @@ func TestTransport_Move(t *testing.T) {
 		return location
 	}
 
-	car, err := courier.NewTransport(uuid.New(), "Car", 3)
+	car, err := courier.NewTransport(courier.NewTransportID(), "Car", 3)
 	require.NoError(t, err)
 
 	tests := []struct {

@@ -48,9 +48,9 @@ func (s *CourierRepositoryTestSuite) TestCreate() {
 		Error
 	s.Require().NoError(err)
 
-	s.Assert().Equal(courierEntity.ID(), courierRecord.ID)
+	s.Assert().Equal(courierEntity.ID(), domainCourier.ID(courierRecord.ID))
 	s.Assert().Equal(courierEntity.Name(), courierRecord.Name)
-	s.Assert().Equal(courierEntity.Transport().ID(), courierRecord.Transport.ID)
+	s.Assert().Equal(courierEntity.Transport().ID(), domainCourier.TransportID(courierRecord.Transport.ID))
 	s.Assert().Equal(courierEntity.Transport().Name(), courierRecord.Transport.Name)
 	s.Assert().Equal(courierEntity.Transport().Speed(), courierRecord.Transport.Speed)
 	s.Assert().Equal(courierEntity.Location().X(), courierRecord.Location.X)
@@ -84,9 +84,9 @@ func (s *CourierRepositoryTestSuite) TestUpdate() {
 		Error
 	s.Require().NoError(err)
 
-	s.Assert().Equal(courierEntity.ID(), courierRecord.ID)
+	s.Assert().Equal(courierEntity.ID(), domainCourier.ID(courierRecord.ID))
 	s.Assert().Equal(courierEntity.Name(), courierRecord.Name)
-	s.Assert().Equal(courierEntity.Transport().ID(), courierRecord.Transport.ID)
+	s.Assert().Equal(courierEntity.Transport().ID(), domainCourier.TransportID(courierRecord.Transport.ID))
 	s.Assert().Equal(courierEntity.Transport().Name(), courierRecord.Transport.Name)
 	s.Assert().Equal(courierEntity.Transport().Speed(), courierRecord.Transport.Speed)
 	s.Assert().Equal(courierEntity.Location().X(), courierRecord.Location.X)

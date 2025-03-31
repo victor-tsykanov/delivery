@@ -3,7 +3,9 @@ package order
 import (
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/kernel"
+	"github.com/victor-tsykanov/delivery/internal/core/domain/model/courier"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/model/order"
 )
 
@@ -11,13 +13,13 @@ func toRecordFromDomainEntity(entity *order.Order) *Order {
 	location := entity.Location()
 
 	return &Order{
-		ID: entity.ID(),
+		ID: uuid.UUID(entity.ID()),
 		Location: Location{
 			location.X(),
 			location.Y(),
 		},
 		Status:    string(entity.Status()),
-		CourierID: entity.CourierID(),
+		CourierID: (*uuid.UUID)(entity.CourierID()),
 	}
 }
 
@@ -28,9 +30,9 @@ func toDomainEntityFromRecord(record *Order) (*order.Order, error) {
 	}
 
 	return order.RestoreOrder(
-		record.ID,
+		order.ID(record.ID),
 		location,
 		order.Status(record.Status),
-		record.CourierID,
+		(*courier.ID)(record.CourierID),
 	), nil
 }

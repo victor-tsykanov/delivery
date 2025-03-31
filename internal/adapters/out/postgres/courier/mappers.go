@@ -3,16 +3,17 @@ package courier
 import (
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/kernel"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/model/courier"
 )
 
 func toRecordFromDomainEntity(entity *courier.Courier) *Courier {
 	return &Courier{
-		ID:   entity.ID(),
+		ID:   uuid.UUID(entity.ID()),
 		Name: entity.Name(),
 		Transport: Transport{
-			ID:    entity.Transport().ID(),
+			ID:    uuid.UUID(entity.Transport().ID()),
 			Name:  entity.Transport().Name(),
 			Speed: entity.Transport().Speed(),
 		},
@@ -31,13 +32,13 @@ func toDomainEntityFromRecord(record *Courier) (*courier.Courier, error) {
 	}
 
 	transport := courier.RestoreTransport(
-		record.Transport.ID,
+		courier.TransportID(record.Transport.ID),
 		record.Transport.Name,
 		record.Transport.Speed,
 	)
 
 	return courier.RestoreCourier(
-		record.ID,
+		courier.ID(record.ID),
 		record.Name,
 		transport,
 		location,

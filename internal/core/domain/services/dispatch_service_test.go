@@ -3,7 +3,6 @@ package services_test
 import (
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/victor-tsykanov/delivery/internal/common/errors"
@@ -17,7 +16,7 @@ func TestDispatchService_Dispatch(t *testing.T) {
 	orderLocation, err := kernel.NewLocation(1, 1)
 	require.NoError(t, err)
 
-	theOrder, err := order.NewOrder(uuid.New(), *orderLocation)
+	theOrder, err := order.NewOrder(order.NewID(), *orderLocation)
 	require.NoError(t, err)
 
 	tests := []struct {

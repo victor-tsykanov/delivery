@@ -8,8 +8,14 @@ import (
 	"github.com/victor-tsykanov/delivery/internal/core/domain/kernel"
 )
 
+type ID uuid.UUID
+
+func NewID() ID {
+	return ID(uuid.New())
+}
+
 type Courier struct {
-	id        uuid.UUID
+	id        ID
 	name      string
 	transport *Transport
 	location  *kernel.Location
@@ -40,13 +46,13 @@ func NewCourier(
 		return nil, errors.NewValueIsRequiredError("location")
 	}
 
-	transport, err := NewTransport(uuid.New(), transportName, transportSpeed)
+	transport, err := NewTransport(NewTransportID(), transportName, transportSpeed)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Courier{
-		id:        uuid.New(),
+		id:        NewID(),
 		name:      name,
 		transport: transport,
 		location:  location,
@@ -108,7 +114,7 @@ func (c *Courier) CalculateStepsToLocation(location *kernel.Location) (int, erro
 	return steps, nil
 }
 
-func (c *Courier) ID() uuid.UUID {
+func (c *Courier) ID() ID {
 	return c.id
 }
 
@@ -129,7 +135,7 @@ func (c *Courier) Status() Status {
 }
 
 func RestoreCourier(
-	id uuid.UUID,
+	id ID,
 	name string,
 	transport *Transport,
 	location *kernel.Location,

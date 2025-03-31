@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/victor-tsykanov/delivery/internal/adapters/out/postgres"
 	"github.com/victor-tsykanov/delivery/internal/common/errors"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/model/order"
@@ -37,7 +36,7 @@ func (r *Repository) Update(ctx context.Context, order *order.Order) error {
 	return tx.Save(&orderRecord).Error
 }
 
-func (r *Repository) Get(ctx context.Context, id uuid.UUID) (*order.Order, error) {
+func (r *Repository) Get(ctx context.Context, id order.ID) (*order.Order, error) {
 	orderRecord := &Order{}
 
 	tx := postgres.GetTransactionFromContext(ctx, r.db)

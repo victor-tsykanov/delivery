@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
 	"github.com/victor-tsykanov/delivery/internal/adapters/out/postgres/order"
 	"github.com/victor-tsykanov/delivery/internal/common/testutils"
@@ -35,7 +34,7 @@ func TestOrderRepositoryTestSuite(t *testing.T) {
 func (s *OrderRepositoryTestSuite) TestCreate() {
 	// Arrange
 	orderLocation := kernel.RandomLocation()
-	orderEntity, err := domainOrder.NewOrder(uuid.New(), *orderLocation)
+	orderEntity, err := domainOrder.NewOrder(domainOrder.NewID(), *orderLocation)
 	s.Require().NoError(err)
 
 	// Act
@@ -51,13 +50,13 @@ func (s *OrderRepositoryTestSuite) TestCreate() {
 	s.Assert().Equal(orderLocation.X(), orderRecord.Location.X)
 	s.Assert().Equal(orderLocation.Y(), orderRecord.Location.Y)
 	s.Assert().Equal(string(orderEntity.Status()), orderRecord.Status)
-	s.Assert().Equal(orderEntity.CourierID(), orderRecord.CourierID)
+	s.Assert().Equal(orderEntity.CourierID(), (*courier.ID)(orderRecord.CourierID))
 }
 
 func (s *OrderRepositoryTestSuite) TestUpdate() {
 	// Arrange
 	orderLocation := kernel.RandomLocation()
-	orderEntity, err := domainOrder.NewOrder(uuid.New(), *orderLocation)
+	orderEntity, err := domainOrder.NewOrder(domainOrder.NewID(), *orderLocation)
 	s.Require().NoError(err)
 
 	err = s.repository.Create(context.Background(), orderEntity)
@@ -83,7 +82,7 @@ func (s *OrderRepositoryTestSuite) TestUpdate() {
 	s.Assert().Equal(orderLocation.X(), orderRecord.Location.X)
 	s.Assert().Equal(orderLocation.Y(), orderRecord.Location.Y)
 	s.Assert().Equal(string(orderEntity.Status()), orderRecord.Status)
-	s.Assert().Equal(orderEntity.CourierID(), orderRecord.CourierID)
+	s.Assert().Equal(orderEntity.CourierID(), (*courier.ID)(orderRecord.CourierID))
 }
 
 func (s *OrderRepositoryTestSuite) TesGet() {
@@ -149,7 +148,7 @@ func (s *OrderRepositoryTestSuite) TestFindAssigned() {
 
 func (s *OrderRepositoryTestSuite) createNewOrder() *domainOrder.Order {
 	orderLocation := kernel.RandomLocation()
-	orderEntity, err := domainOrder.NewOrder(uuid.New(), *orderLocation)
+	orderEntity, err := domainOrder.NewOrder(domainOrder.NewID(), *orderLocation)
 	s.Require().NoError(err)
 
 	return orderEntity
