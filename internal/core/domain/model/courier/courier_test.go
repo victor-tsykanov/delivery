@@ -1,7 +1,6 @@
 package courier_test
 
 import (
-	"log"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -153,9 +152,9 @@ func TestCourier_SetFree(t *testing.T) {
 }
 
 func TestCourier_Move(t *testing.T) {
-	currentLocation := newLocation(1, 1)
-	targetLocation := newLocation(1, 9)
-	expectedLocation := newLocation(1, 4)
+	currentLocation := kernel.MustNewLocation(1, 1)
+	targetLocation := kernel.MustNewLocation(1, 9)
+	expectedLocation := kernel.MustNewLocation(1, 4)
 
 	john, err := courier.NewCourier("John Doe", "Car", 3, currentLocation)
 	require.NoError(t, err)
@@ -175,20 +174,20 @@ func TestCourier_CalculateStepsToLocation(t *testing.T) {
 	}{
 		{
 			name: "same location",
-			from: newLocation(1, 1),
-			to:   newLocation(1, 1),
+			from: kernel.MustNewLocation(1, 1),
+			to:   kernel.MustNewLocation(1, 1),
 			want: 0,
 		},
 		{
 			name: "steps without remaining",
-			from: newLocation(1, 1),
-			to:   newLocation(7, 1),
+			from: kernel.MustNewLocation(1, 1),
+			to:   kernel.MustNewLocation(7, 1),
 			want: 2,
 		},
 		{
 			name: "steps with remaining",
-			from: newLocation(1, 1),
-			to:   newLocation(9, 1),
+			from: kernel.MustNewLocation(1, 1),
+			to:   kernel.MustNewLocation(9, 1),
 			want: 3,
 		},
 	}
@@ -204,13 +203,4 @@ func TestCourier_CalculateStepsToLocation(t *testing.T) {
 			assert.Equal(t, tt.want, steps)
 		})
 	}
-}
-
-func newLocation(x int, y int) *kernel.Location {
-	location, err := kernel.NewLocation(x, y)
-	if err != nil {
-		log.Fatalf("failed to create location: %v", err)
-	}
-
-	return location
 }
