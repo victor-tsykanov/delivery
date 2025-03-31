@@ -12,26 +12,26 @@ type ICreateOrderCommandHandler interface {
 }
 
 type CreateOrderCommand struct {
-	id     uuid.UUID
-	street string
+	basketID uuid.UUID
+	street   string
 }
 
-func (c *CreateOrderCommand) ID() uuid.UUID {
-	return c.id
+func (c *CreateOrderCommand) BasketID() uuid.UUID {
+	return c.basketID
 }
 
 func (c *CreateOrderCommand) Street() string {
 	return c.street
 }
 
-func NewCreateOrderCommand(id uuid.UUID, street string) (*CreateOrderCommand, error) {
-	if id == uuid.Nil {
-		return nil, errors.NewValueIsRequiredError("id")
+func NewCreateOrderCommand(basketID uuid.UUID, street string) (*CreateOrderCommand, error) {
+	if basketID == uuid.Nil {
+		return nil, errors.NewValueIsRequiredError("basketID")
 	}
 
 	if street == "" {
 		return nil, errors.NewValueIsRequiredError("street")
 	}
 
-	return &CreateOrderCommand{id: id, street: street}, nil
+	return &CreateOrderCommand{basketID: basketID, street: street}, nil
 }

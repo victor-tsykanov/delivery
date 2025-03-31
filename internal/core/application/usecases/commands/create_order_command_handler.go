@@ -47,9 +47,9 @@ func (h *CreateOrderCommandHandler) Handle(ctx context.Context, command inPorts.
 		return fmt.Errorf("falied to get location for street %s: %w", command.Street(), err)
 	}
 
-	order, err := order.NewOrder(command.ID(), *location)
+	order, err := order.NewOrder(order.ID(command.BasketID()), *location)
 	if err != nil {
-		return fmt.Errorf("falied to create order %s: %w", command.ID(), err)
+		return fmt.Errorf("falied to create order %s: %w", command.BasketID(), err)
 	}
 
 	err = h.transactionManager.Execute(ctx, func(ctx context.Context) error {

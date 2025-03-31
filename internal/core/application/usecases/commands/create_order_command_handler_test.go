@@ -19,7 +19,7 @@ import (
 func TestCreateOrderCommandHandler_Handle(t *testing.T) {
 	// Arrange
 	ctx := context.Background()
-	orderID := uuid.New()
+	basketID := uuid.New()
 	street := gofakeit.Address().Address
 	location := kernel.RandomLocation()
 
@@ -40,7 +40,7 @@ func TestCreateOrderCommandHandler_Handle(t *testing.T) {
 	orderRepository.
 		EXPECT().
 		Create(ctx, mock.MatchedBy(func(newOrder *order.Order) bool {
-			return newOrder.ID() == orderID &&
+			return newOrder.ID() == order.ID(basketID) &&
 				newOrder.Status() == order.StatusCreated &&
 				location.Equals(newOrder.Location())
 		})).
@@ -56,7 +56,7 @@ func TestCreateOrderCommandHandler_Handle(t *testing.T) {
 	handler, err := commands.NewCreateOrderCommandHandler(transactionManager, orderRepository, geoClient)
 	require.NoError(t, err)
 
-	command, err := inPorts.NewCreateOrderCommand(orderID, street)
+	command, err := inPorts.NewCreateOrderCommand(basketID, street)
 	require.NoError(t, err)
 
 	// Act
