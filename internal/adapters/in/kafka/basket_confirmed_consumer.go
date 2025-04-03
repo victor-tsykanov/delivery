@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/victor-tsykanov/delivery/internal/common/config"
 	inPorts "github.com/victor-tsykanov/delivery/internal/core/ports/in"
-	basketconfirmed "github.com/victor-tsykanov/delivery/pkg/events/basket"
+	"github.com/victor-tsykanov/delivery/pkg/queues/basketconfirmedpb"
 )
 
 type BasketConfirmedConsumer struct {
@@ -78,7 +78,7 @@ func (c *BasketConfirmedConsumer) Close() error {
 func (c *BasketConfirmedConsumer) processMessage(ctx context.Context, message *kafka.Message) error {
 	log.Printf("processing message %s: %s\n", c.topic, message.Value)
 
-	var event basketconfirmed.BasketConfirmedIntegrationEvent
+	var event basketconfirmedpb.BasketConfirmedIntegrationEvent
 	err := json.Unmarshal(message.Value, &event)
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal message: %w", err)
