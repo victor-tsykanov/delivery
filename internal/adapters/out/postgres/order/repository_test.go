@@ -4,23 +4,27 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"github.com/victor-tsykanov/delivery/internal/adapters/out/postgres/order"
 	"github.com/victor-tsykanov/delivery/internal/common/testutils"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/kernel"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/model/courier"
 	domainOrder "github.com/victor-tsykanov/delivery/internal/core/domain/model/order"
+	"github.com/victor-tsykanov/delivery/mocks/github.com/victor-tsykanov/delivery/internal_/common/eventdispatcher"
 )
 
 type OrderRepositoryTestSuite struct {
 	testutils.DBTestSuite
-	repository *order.Repository
+	eventDispatcherMock *eventdispatcher.MockIEventDispatcher
+	repository          *order.Repository
 }
 
 func (s *OrderRepositoryTestSuite) SetupTest() {
 	s.DBTestSuite.SetupTest()
 
-	repository, err := order.NewRepository(s.DB())
+	s.eventDispatcherMock = eventdispatcher.NewMockIEventDispatcher(s.T())
+	repository, err := order.NewRepository(s.DB(), s.eventDispatcherMock)
 	s.Require().NoError(err)
 
 	s.repository = repository
@@ -65,6 +69,17 @@ func (s *OrderRepositoryTestSuite) TestUpdate() {
 	courierEntity := courier.Fixtures.FreeCourier()
 	err = orderEntity.Assign(courierEntity)
 	s.Require().NoError(err)
+
+	s.eventDispatcherMock.
+		EXPECT().
+		Dispatch(
+			mock.IsType(context.Background()),
+			mock.MatchedBy(func(event *domainOrder.CompletedEvent) bool {
+				eventOrder := event.Order()
+				return eventOrder.ID() == orderEntity.ID()
+			}),
+		).
+		Return(nil)
 
 	err = orderEntity.Complete()
 	s.Require().NoError(err)

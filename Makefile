@@ -32,6 +32,8 @@ generate-geo-api:
 generate-queues-events:
 	wget https://gitlab.com/microarch-ru/ddd-in-practice/system-design/-/raw/main/services/basket/contracts/basket_confirmed.proto -O api/basket/queues/basket_confirmed.proto
 	protoc --go_out=./pkg --plugin=protoc-gen-go=bin/protoc-gen-go api/basket/queues/basket_confirmed.proto
+	wget https://gitlab.com/microarch-ru/ddd-in-practice/system-design/-/raw/main/services/delivery/contracts/order_status_changed.proto -O api/delivery/queues/order_status_changed.proto
+	protoc --go_out=./pkg --plugin=protoc-gen-go=bin/protoc-gen-go api/delivery/queues/order_status_changed.proto
 
 test:
 	go test ./...

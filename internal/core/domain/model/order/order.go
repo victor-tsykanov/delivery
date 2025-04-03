@@ -2,12 +2,17 @@ package order
 
 import (
 	"github.com/google/uuid"
+	"github.com/victor-tsykanov/delivery/internal/common/ddd"
 	"github.com/victor-tsykanov/delivery/internal/common/errors"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/kernel"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/model/courier"
 )
 
 type ID uuid.UUID
+
+func (i ID) String() string {
+	return uuid.UUID(i).String()
+}
 
 func (i ID) IsNil() bool {
 	return uuid.UUID(i) == uuid.Nil
@@ -18,10 +23,11 @@ func NewID() ID {
 }
 
 type Order struct {
-	id        ID
-	location  kernel.Location
-	status    Status
-	courierID *courier.ID
+	id           ID
+	location     kernel.Location
+	status       Status
+	courierID    *courier.ID
+	domainEvents []ddd.IDomainEvent
 }
 
 func NewOrder(id ID, location kernel.Location) (*Order, error) {
@@ -93,6 +99,8 @@ func (o *Order) Complete() error {
 
 	o.status = StatusCompleted
 
+	o.raiseDomainEvent(NewCompletedEvent(*o))
+
 	return nil
 }
 
@@ -103,4 +111,16 @@ func RestoreOrder(id ID, location *kernel.Location, status Status, courierID *co
 		status:    status,
 		courierID: courierID,
 	}
+}
+
+func (o *Order) DomainEvents() []ddd.IDomainEvent {
+	return o.domainEvents
+}
+
+func (o *Order) ClearDomainEvents() {
+	o.domainEvents = make([]ddd.IDomainEvent, 0)
+}
+
+func (o *Order) raiseDomainEvent(event ddd.IDomainEvent) {
+	o.domainEvents = append(o.domainEvents, event)
 }

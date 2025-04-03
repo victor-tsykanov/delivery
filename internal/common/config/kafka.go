@@ -8,9 +8,10 @@ import (
 )
 
 type KafkaConfig struct {
-	Address              string `env:"KAFKA_ADDRESS,notEmpty"`
-	ConsumerGroup        string `env:"KAFKA_CONSUMER_GROUP,notEmpty"`
-	BasketConfirmedTopic string `env:"KAFKA_BASKET_CONFIRMED_TOPIC,notEmpty"`
+	Address                 string `env:"KAFKA_ADDRESS,notEmpty"`
+	ConsumerGroup           string `env:"KAFKA_CONSUMER_GROUP,notEmpty"`
+	BasketConfirmedTopic    string `env:"KAFKA_BASKET_CONFIRMED_TOPIC,notEmpty"`
+	OrderStatusChangedTopic string `env:"KAFKA_ORDER_STATUS_CHANGED_TOPIC,notEmpty"`
 }
 
 func LoadKafkaConfig() (*KafkaConfig, error) {

@@ -5,14 +5,17 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/victor-tsykanov/delivery/internal/adapters/in/kafka"
+	kafkaInAdapters "github.com/victor-tsykanov/delivery/internal/adapters/in/kafka"
 	"github.com/victor-tsykanov/delivery/internal/adapters/out/grpc"
+	kafkaOutAdapters "github.com/victor-tsykanov/delivery/internal/adapters/out/kafka"
 	"github.com/victor-tsykanov/delivery/internal/adapters/out/postgres"
 	"github.com/victor-tsykanov/delivery/internal/adapters/out/postgres/courier"
 	"github.com/victor-tsykanov/delivery/internal/adapters/out/postgres/order"
 	"github.com/victor-tsykanov/delivery/internal/common/config"
+	"github.com/victor-tsykanov/delivery/internal/common/eventdispatcher"
 	"github.com/victor-tsykanov/delivery/internal/common/persistence"
 	"github.com/victor-tsykanov/delivery/internal/core/application/usecases/commands"
+	"github.com/victor-tsykanov/delivery/internal/core/application/usecases/events"
 	"github.com/victor-tsykanov/delivery/internal/core/application/usecases/queries"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/services"
 	inPorts "github.com/victor-tsykanov/delivery/internal/core/ports/in"
@@ -26,6 +29,7 @@ type CompositionRoot struct {
 	CommandHandlers   CommandHandlers
 	QueryHandlers     QueryHandlers
 	QueueConsumers    QueueConsumers
+	QueueProducers    QueueProducers
 	shutdownCallbacks []shutdownCallback
 }
 
@@ -62,7 +66,11 @@ type QueryHandlers struct {
 }
 
 type QueueConsumers struct {
-	BasketConfirmedConsumer *kafka.BasketConfirmedConsumer
+	BasketConfirmedConsumer *kafkaInAdapters.BasketConfirmedConsumer
+}
+
+type QueueProducers struct {
+	OrderCompletedEventProducer *kafkaOutAdapters.OrderCompletedEventProducer
 }
 
 func NewCompositionRoot(
@@ -81,7 +89,9 @@ func NewCompositionRoot(
 		log.Fatalf("faied to create GormTransactionManager: %v", err)
 	}
 
-	orderRepository, err := order.NewRepository(gormDb)
+	eventDispatcher := eventdispatcher.New()
+
+	orderRepository, err := order.NewRepository(gormDb, eventDispatcher)
 	if err != nil {
 		log.Fatalf("faied to create order repository: %v", err)
 	}
@@ -134,10 +144,22 @@ func NewCompositionRoot(
 		log.Fatalf("faied to create GetPendingOrdersQueryHandler: %v", err)
 	}
 
-	basketConfirmedConsumer, err := kafka.NewBasketConfirmedConsumer(createOrderCommandHandler, kafkaConfig)
+	basketConfirmedConsumer, err := kafkaInAdapters.NewBasketConfirmedConsumer(createOrderCommandHandler, kafkaConfig)
 	if err != nil {
 		log.Fatalf("faied to create BasketConfirmedConsumer: %v", err)
 	}
+
+	orderCompletedProducer, err := kafkaOutAdapters.NewOrderCompletedEventProducer(kafkaConfig)
+	if err != nil {
+		log.Fatalf("faied to create OrderCompletedEventProducer: %v", err)
+	}
+
+	orderCompletedEventHandler, err := events.NewOrderCompletedEventHandler(orderCompletedProducer)
+	if err != nil {
+		log.Fatalf("faied to create OrderCompletedEventHandler: %v", err)
+	}
+
+	eventdispatcher.Register(eventDispatcher, orderCompletedEventHandler)
 
 	compositionRoot := CompositionRoot{
 		DomainServices: DomainServices{
@@ -160,12 +182,18 @@ func NewCompositionRoot(
 		QueueConsumers: QueueConsumers{
 			BasketConfirmedConsumer: basketConfirmedConsumer,
 		},
+		QueueProducers: QueueProducers{
+			OrderCompletedEventProducer: orderCompletedProducer,
+		},
 		shutdownCallbacks: []shutdownCallback{
 			func(_ context.Context) error {
 				return geoClient.Close()
 			},
 			func(_ context.Context) error {
 				return basketConfirmedConsumer.Close()
+			},
+			func(_ context.Context) error {
+				return orderCompletedProducer.Close()
 			},
 		},
 	}
