@@ -5,35 +5,58 @@ import (
 	"fmt"
 
 	"github.com/victor-tsykanov/delivery/internal/adapters/out/postgres"
+	"github.com/victor-tsykanov/delivery/internal/common/ddd"
 	"github.com/victor-tsykanov/delivery/internal/common/errors"
+	"github.com/victor-tsykanov/delivery/internal/common/eventdispatcher"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/model/order"
 	"gorm.io/gorm"
 )
 
 type Repository struct {
-	db *gorm.DB
+	db              *gorm.DB
+	eventDispatcher eventdispatcher.IEventDispatcher
 }
 
-func NewRepository(db *gorm.DB) (*Repository, error) {
+func NewRepository(db *gorm.DB, eventDispatcher eventdispatcher.IEventDispatcher) (*Repository, error) {
 	if db == nil {
 		return nil, errors.NewValueIsRequiredError("db")
 	}
 
-	return &Repository{db: db}, nil
+	return &Repository{db: db, eventDispatcher: eventDispatcher}, nil
 }
 
 func (r *Repository) Create(ctx context.Context, order *order.Order) error {
 	orderRecord := toRecordFromDomainEntity(order)
 
 	tx := postgres.GetTransactionFromContext(ctx, r.db)
-	return tx.Create(&orderRecord).Error
+	err := tx.Create(&orderRecord).Error
+	if err != nil {
+		return err
+	}
+
+	err = r.publishDomainEvents(ctx, order)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r *Repository) Update(ctx context.Context, order *order.Order) error {
 	orderRecord := toRecordFromDomainEntity(order)
 
 	tx := postgres.GetTransactionFromContext(ctx, r.db)
-	return tx.Save(&orderRecord).Error
+	err := tx.Save(&orderRecord).Error
+	if err != nil {
+		return err
+	}
+
+	err = r.publishDomainEvents(ctx, order)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r *Repository) Get(ctx context.Context, id order.ID) (*order.Order, error) {
@@ -85,4 +108,16 @@ func (r *Repository) findByStatus(ctx context.Context, status order.Status) ([]*
 	}
 
 	return orders, nil
+}
+
+func (r *Repository) publishDomainEvents(ctx context.Context, aggregate ddd.IAggregateRoot) error {
+	for _, event := range aggregate.DomainEvents() {
+		err := r.eventDispatcher.Dispatch(ctx, event)
+		if err != nil {
+			return err
+		}
+	}
+	aggregate.ClearDomainEvents()
+
+	return nil
 }

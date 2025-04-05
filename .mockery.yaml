@@ -1,6 +1,9 @@
 with-expecter: True
 dir: mocks/{{ replaceAll .PackagePath "internal" "internal_" }}
 packages:
+  github.com/victor-tsykanov/delivery/internal/common/eventdispatcher:
+    interfaces:
+      IEventDispatcher:
   github.com/victor-tsykanov/delivery/internal/common/persistence:
     interfaces:
       ITransactionManager:
