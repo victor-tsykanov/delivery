@@ -28,6 +28,10 @@ func MoveCouriers(ctx context.Context, root *app.CompositionRoot) {
 	repeatTask(ctx, job.Execute, 1*time.Second)
 }
 
+func ProcessOutboxMessages(ctx context.Context, root *app.CompositionRoot) {
+	root.EventsOutbox.ProcessNewMessages(ctx)
+}
+
 func repeatTask(ctx context.Context, fn func(ctx context.Context) error, interval time.Duration) {
 	for {
 		func() {

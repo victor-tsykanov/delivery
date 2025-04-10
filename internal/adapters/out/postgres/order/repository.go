@@ -5,24 +5,23 @@ import (
 	"fmt"
 
 	"github.com/victor-tsykanov/delivery/internal/adapters/out/postgres"
-	"github.com/victor-tsykanov/delivery/internal/common/ddd"
 	"github.com/victor-tsykanov/delivery/internal/common/errors"
-	"github.com/victor-tsykanov/delivery/internal/common/eventdispatcher"
+	"github.com/victor-tsykanov/delivery/internal/common/persistence"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/model/order"
 	"gorm.io/gorm"
 )
 
 type Repository struct {
-	db              *gorm.DB
-	eventDispatcher eventdispatcher.IEventDispatcher
+	db           *gorm.DB
+	eventsOutbox persistence.IEventsOutbox
 }
 
-func NewRepository(db *gorm.DB, eventDispatcher eventdispatcher.IEventDispatcher) (*Repository, error) {
+func NewRepository(db *gorm.DB, eventsOutbox persistence.IEventsOutbox) (*Repository, error) {
 	if db == nil {
 		return nil, errors.NewValueIsRequiredError("db")
 	}
 
-	return &Repository{db: db, eventDispatcher: eventDispatcher}, nil
+	return &Repository{db: db, eventsOutbox: eventsOutbox}, nil
 }
 
 func (r *Repository) Create(ctx context.Context, order *order.Order) error {
@@ -34,7 +33,7 @@ func (r *Repository) Create(ctx context.Context, order *order.Order) error {
 		return err
 	}
 
-	err = r.publishDomainEvents(ctx, order)
+	err = r.eventsOutbox.StoreAggregateEvents(ctx, order)
 	if err != nil {
 		return err
 	}
@@ -51,7 +50,7 @@ func (r *Repository) Update(ctx context.Context, order *order.Order) error {
 		return err
 	}
 
-	err = r.publishDomainEvents(ctx, order)
+	err = r.eventsOutbox.StoreAggregateEvents(ctx, order)
 	if err != nil {
 		return err
 	}
@@ -108,16 +107,4 @@ func (r *Repository) findByStatus(ctx context.Context, status order.Status) ([]*
 	}
 
 	return orders, nil
-}
-
-func (r *Repository) publishDomainEvents(ctx context.Context, aggregate ddd.IAggregateRoot) error {
-	for _, event := range aggregate.DomainEvents() {
-		err := r.eventDispatcher.Dispatch(ctx, event)
-		if err != nil {
-			return err
-		}
-	}
-	aggregate.ClearDomainEvents()
-
-	return nil
 }

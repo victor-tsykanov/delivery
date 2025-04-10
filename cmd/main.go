@@ -29,6 +29,7 @@ func main() {
 	go http.Serve(ctx, root, httpConfig)
 	go jobs.AssignOrders(ctx, root)
 	go jobs.MoveCouriers(ctx, root)
+	go jobs.ProcessOutboxMessages(ctx, root)
 	go queues.Consume(ctx, root)
 
 	signalChan := make(chan os.Signal, 1)

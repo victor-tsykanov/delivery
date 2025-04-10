@@ -1,6 +1,15 @@
 with-expecter: True
 dir: mocks/{{ replaceAll .PackagePath "internal" "internal_" }}
 packages:
+  github.com/victor-tsykanov/delivery/internal/adapters/out/postgres/outbox:
+    interfaces:
+      IRepository:
+  github.com/victor-tsykanov/delivery/internal/adapters/out/postgres/outbox/eventserializers:
+    interfaces:
+      IRegistry:
+  github.com/victor-tsykanov/delivery/internal/common/ddd:
+    interfaces:
+      IAggregateRoot:
   github.com/victor-tsykanov/delivery/internal/common/eventdispatcher:
     interfaces:
       IEventDispatcher:

@@ -1,6 +1,10 @@
 package order
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+)
+
+const EventTypeCompleted = "order.completed"
 
 type CompletedEvent struct {
 	id    uuid.UUID
@@ -16,9 +20,13 @@ func (e *CompletedEvent) ID() uuid.UUID {
 }
 
 func (e *CompletedEvent) Type() string {
-	return "order.confirmed"
+	return EventTypeCompleted
 }
 
 func (e *CompletedEvent) Order() Order {
 	return e.order
+}
+
+func RestoreCompletedEvent(id uuid.UUID, order Order) *CompletedEvent {
+	return &CompletedEvent{id: id, order: order}
 }
