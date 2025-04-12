@@ -58,11 +58,7 @@ func (h *MoveCouriersCommandHandler) Handle(ctx context.Context) error {
 		}
 	}
 
-	if len(errs) > 0 {
-		return errors.Join(errs...)
-	}
-
-	return nil
+	return errors.Join(errs...)
 }
 
 func (h *MoveCouriersCommandHandler) processOrder(ctx context.Context, order *order.Order) error {
