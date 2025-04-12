@@ -11,6 +11,8 @@ import (
 	"github.com/victor-tsykanov/delivery/internal/adapters/out/postgres"
 	"github.com/victor-tsykanov/delivery/internal/adapters/out/postgres/courier"
 	"github.com/victor-tsykanov/delivery/internal/adapters/out/postgres/order"
+	"github.com/victor-tsykanov/delivery/internal/adapters/out/postgres/outbox"
+	"github.com/victor-tsykanov/delivery/internal/adapters/out/postgres/outbox/eventserializers"
 	"github.com/victor-tsykanov/delivery/internal/common/config"
 	"github.com/victor-tsykanov/delivery/internal/common/eventdispatcher"
 	"github.com/victor-tsykanov/delivery/internal/common/persistence"
@@ -30,6 +32,7 @@ type CompositionRoot struct {
 	QueryHandlers     QueryHandlers
 	QueueConsumers    QueueConsumers
 	QueueProducers    QueueProducers
+	EventsOutbox      *outbox.EventsOutbox
 	shutdownCallbacks []shutdownCallback
 }
 
@@ -91,7 +94,22 @@ func NewCompositionRoot(
 
 	eventDispatcher := eventdispatcher.New()
 
-	orderRepository, err := order.NewRepository(gormDb, eventDispatcher)
+	outboxRepository, err := outbox.NewRepository(gormDb)
+	if err != nil {
+		log.Fatalf("faied to create outbox repository: %v", err)
+	}
+
+	eventSerializersRegistry, err := eventserializers.NewRegistry()
+	if err != nil {
+		log.Fatalf("faied to create event serializers registry: %v", err)
+	}
+
+	eventsOutbox, err := outbox.NewEventsOutbox(outboxRepository, eventSerializersRegistry, eventDispatcher)
+	if err != nil {
+		log.Fatalf("faied to create events outbox: %v", err)
+	}
+
+	orderRepository, err := order.NewRepository(gormDb, eventsOutbox)
 	if err != nil {
 		log.Fatalf("faied to create order repository: %v", err)
 	}
@@ -185,6 +203,7 @@ func NewCompositionRoot(
 		QueueProducers: QueueProducers{
 			OrderCompletedEventProducer: orderCompletedProducer,
 		},
+		EventsOutbox: eventsOutbox,
 		shutdownCallbacks: []shutdownCallback{
 			func(_ context.Context) error {
 				return geoClient.Close()
@@ -194,6 +213,10 @@ func NewCompositionRoot(
 			},
 			func(_ context.Context) error {
 				return orderCompletedProducer.Close()
+			},
+			func(_ context.Context) error {
+				eventsOutbox.ShutDown()
+				return nil
 			},
 		},
 	}

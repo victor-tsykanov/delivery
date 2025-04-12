@@ -4,9 +4,10 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"github.com/victor-tsykanov/delivery/internal/adapters/out/postgres/order"
+	"github.com/victor-tsykanov/delivery/internal/adapters/out/postgres/outbox"
+	"github.com/victor-tsykanov/delivery/internal/adapters/out/postgres/outbox/eventserializers"
 	"github.com/victor-tsykanov/delivery/internal/common/testutils"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/kernel"
 	"github.com/victor-tsykanov/delivery/internal/core/domain/model/courier"
@@ -16,15 +17,24 @@ import (
 
 type OrderRepositoryTestSuite struct {
 	testutils.DBTestSuite
-	eventDispatcherMock *eventdispatcher.MockIEventDispatcher
-	repository          *order.Repository
+	repository *order.Repository
 }
 
 func (s *OrderRepositoryTestSuite) SetupTest() {
 	s.DBTestSuite.SetupTest()
 
-	s.eventDispatcherMock = eventdispatcher.NewMockIEventDispatcher(s.T())
-	repository, err := order.NewRepository(s.DB(), s.eventDispatcherMock)
+	outboxRepository, err := outbox.NewRepository(s.DB())
+	s.Require().NoError(err)
+
+	eventSerializersRegistry, err := eventserializers.NewRegistry()
+	s.Require().NoError(err)
+
+	eventDispatcher := eventdispatcher.NewMockIEventDispatcher(s.T())
+
+	eventsOutbox, err := outbox.NewEventsOutbox(outboxRepository, eventSerializersRegistry, eventDispatcher)
+	s.Require().NoError(err)
+
+	repository, err := order.NewRepository(s.DB(), eventsOutbox)
 	s.Require().NoError(err)
 
 	s.repository = repository
@@ -69,17 +79,6 @@ func (s *OrderRepositoryTestSuite) TestUpdate() {
 	courierEntity := courier.Fixtures.FreeCourier()
 	err = orderEntity.Assign(courierEntity)
 	s.Require().NoError(err)
-
-	s.eventDispatcherMock.
-		EXPECT().
-		Dispatch(
-			mock.IsType(context.Background()),
-			mock.MatchedBy(func(event *domainOrder.CompletedEvent) bool {
-				eventOrder := event.Order()
-				return eventOrder.ID() == orderEntity.ID()
-			}),
-		).
-		Return(nil)
 
 	err = orderEntity.Complete()
 	s.Require().NoError(err)
